@@ -44,6 +44,8 @@ class GoogleAuth extends _$GoogleAuth {
     await apiClient.setToken(googleAuth.idToken!);
 
     try {
+      state = const AsyncLoading();
+
       final json = await apiClient.post(ApiRoutes.login, {});
 
       apiClient.setToken(json['token']);

@@ -39,6 +39,16 @@ Future<void> showModificationModal(BuildContext context, WidgetRef ref) {
                           ref
                               .read(activeFilterProvider.notifier)
                               .setActiveTextFilter(filter.id);
+
+                          if (filter.id != 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Now you will talk ${filter.command}!',
+                                ),
+                              ),
+                            );
+                          }
                           // Optionally close the modal.
                           Navigator.pop(context);
                         },

@@ -109,6 +109,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             onAttachmentPressed: () {
               showModificationModal(context, ref);
             },
+
             theme: DefaultChatTheme(
               secondaryColor: Theme.of(context).colorScheme.surfaceContainer,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
