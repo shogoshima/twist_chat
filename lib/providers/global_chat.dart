@@ -51,7 +51,6 @@ class GlobalChat extends _$GlobalChat {
 
   void updateChat(String chatId, String lastMessage) {
     final currentState = state.value;
-    print(currentState);
 
     if (currentState == null) return;
 

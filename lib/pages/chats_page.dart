@@ -71,7 +71,7 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
                         );
                       }
                     } catch (error) {
-                      // Handle error here, for example:
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text('Error: $error')));

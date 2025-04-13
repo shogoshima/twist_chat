@@ -37,10 +37,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
       future: ref.watch(googleAuthProvider.future),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            backgroundColor: Colors.white, // Explicitly set background color
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
         } else {
           return snapshot.hasData ? const HomePage() : const LoginPage();
         }

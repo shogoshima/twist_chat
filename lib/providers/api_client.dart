@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 // Necessary for code-generation to work
 part 'api_client.g.dart';
 
-const String baseUrl = 'http://192.168.15.6:8080';
+const String baseUrl = 'https://shogoshima.duckdns.org';
 
 class ApiRoutes {
   static String chats = '/chats';

@@ -1,4 +1,4 @@
-package com.example.twist_chat
+package com.shogoshima.twistchat
 
 import io.flutter.embedding.android.FlutterActivity
 
