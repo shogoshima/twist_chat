@@ -24,6 +24,13 @@ class WebSocket extends _$WebSocket {
   /// Here we await for the Google authentication and then create the connection.
   @override
   Future<WebSocketChannel?> build() async {
+    ref.onDispose(() {
+      _reconnectTimer?.cancel();
+      _channel?.sink.close();
+      _channel = null;
+      _userId = null;
+    });
+
     // Watch the authentication provider.
     final User? user = ref.watch(googleAuthProvider).value;
     if (user == null) return null;
@@ -118,12 +125,5 @@ class WebSocket extends _$WebSocket {
       debugPrint('Connection not established. Message not sent.');
       // Optionally implement a queuing mechanism here.
     }
-  }
-
-  void dispose() {
-    _reconnectTimer?.cancel();
-    _channel?.sink.close();
-    _channel = null;
-    _userId = null;
   }
 }
