@@ -11,7 +11,7 @@ abstract class ChatSummary with _$ChatSummary {
     required String chatId,
     required String chatName,
     required bool isGroup,
-    required String chatPhoto,
+    String? chatPhoto,
     String? lastMessage,
   }) = _ChatSummary;
 

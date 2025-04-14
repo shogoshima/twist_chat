@@ -12,6 +12,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 part 'web_socket.g.dart';
 
 const String wsUrl = 'wss://shogoshima.duckdns.org/ws';
+// const String wsUrl = 'ws://192.168.15.6:8080/ws';
 
 @riverpod
 class WebSocket extends _$WebSocket {

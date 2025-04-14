@@ -10,7 +10,7 @@ _ChatSummary _$ChatSummaryFromJson(Map<String, dynamic> json) => _ChatSummary(
   chatId: json['chat_id'] as String,
   chatName: json['chat_name'] as String,
   isGroup: json['is_group'] as bool,
-  chatPhoto: json['chat_photo'] as String,
+  chatPhoto: json['chat_photo'] as String?,
   lastMessage: json['last_message'] as String?,
 );
 

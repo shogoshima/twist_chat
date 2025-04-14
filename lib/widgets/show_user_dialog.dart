@@ -18,7 +18,7 @@ Future<void> showUserDialog(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(user.photoUrl ?? ''),
+              backgroundImage: NetworkImage(user.photoUrl),
               radius: 60,
             ),
           ],

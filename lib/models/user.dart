@@ -11,7 +11,7 @@ abstract class User with _$User {
     required String id,
     required String name,
     required String username,
-    String? photoUrl,
+    required String photoUrl,
     DateTime? lastSeen
   }) = _User;
 

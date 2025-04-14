@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/api_client.dart';
+import 'package:twist_chat/providers/google_auth.dart';
 
 part 'global_chat.g.dart';
 
@@ -9,6 +10,10 @@ class GlobalChat extends _$GlobalChat {
   @override
   Future<List<ChatSummary>> build() async {
     final apiClient = ref.watch(apiClientProvider);
+    ref.watch(googleAuthProvider);
+
+    final hasToken = await apiClient.hasToken();
+    if (!hasToken) return [];
 
     // Fetch all the chats (metadata)
     final json = await apiClient.get(ApiRoutes.summaries);
@@ -35,11 +40,27 @@ class GlobalChat extends _$GlobalChat {
     state = AsyncValue.data([newChat, ...state.value ?? []]);
   }
 
-  Future<void> createNewChat(String username) async {
+  Future<void> createNewSingleChat(String username) async {
     final apiClient = ref.watch(apiClientProvider);
 
-    // Fetch all the chats (metadata)
-    final json = await apiClient.post('${ApiRoutes.chats}/$username', {});
+    // post and receive the new chat (metadata)
+    final json = await apiClient.post(ApiRoutes.dm, {'username': username});
+    if (json['chat'] == null) {
+      return;
+    }
+
+    final newChat = ChatSummary.fromJson(json['chat']);
+
+    state = AsyncValue.data([newChat, ...state.value ?? []]);
+  }
+
+  Future<void> createNewGroupChat(List<String> usernames, String name) async {
+    final apiClient = ref.watch(apiClientProvider);
+
+    final json = await apiClient.post(ApiRoutes.group, {
+      'usernames': usernames,
+      'name': name,
+    });
     if (json['chat'] == null) {
       return;
     }

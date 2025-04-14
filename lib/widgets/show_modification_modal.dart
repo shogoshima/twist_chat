@@ -8,7 +8,6 @@ Future<void> showModificationModal(BuildContext context, WidgetRef ref) {
     context: context,
     isScrollControlled: true,
     builder: (context) {
-      // Using Consumer here so it rebuilds when HomeState changes.
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Wrap(
@@ -39,16 +38,6 @@ Future<void> showModificationModal(BuildContext context, WidgetRef ref) {
                           ref
                               .read(activeFilterProvider.notifier)
                               .setActiveTextFilter(filter.id);
-
-                          if (filter.id != 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Now you will talk ${filter.command}!',
-                                ),
-                              ),
-                            );
-                          }
                           // Optionally close the modal.
                           Navigator.pop(context);
                         },

@@ -21,9 +21,9 @@ class DisappearingBottomNavigationBar extends StatelessWidget {
           label: 'Chats',
         ),
         NavigationDestination(
-          selectedIcon: Icon(Icons.account_circle_outlined),
-          icon: Icon(Icons.account_circle),
-          label: 'Account',
+          selectedIcon: Icon(Icons.settings_outlined),
+          icon: Icon(Icons.settings),
+          label: 'Settings',
         ),
       ],
       selectedIndex: selectedIndex,

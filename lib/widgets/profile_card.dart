@@ -22,7 +22,10 @@ class ProfileCard extends StatelessWidget {
             const SizedBox(height: 5),
             Text(name ?? 'No Name'),
             const SizedBox(height: 2),
-            Text(username ?? 'No Username'),
+            Text(
+              username ?? 'No Username',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),

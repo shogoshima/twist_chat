@@ -64,4 +64,15 @@ class GoogleAuth extends _$GoogleAuth {
 
     state = const AsyncData(null);
   }
+
+  Future<void> delete() async {
+    final apiClient = ref.read(apiClientProvider);
+
+    await apiClient.delete(ApiRoutes.me);
+
+    await apiClient.removeToken();
+    await _googleSignIn.signOut();
+
+    state = const AsyncData(null);
+  }
 }

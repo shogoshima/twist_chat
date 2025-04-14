@@ -14,13 +14,13 @@ import 'package:uuid/uuid.dart';
 class ChatPage extends ConsumerStatefulWidget {
   final String chatId;
   final String chatName;
-  final String chatPhotoUrl;
+  final String? chatPhotoUrl;
   final bool isGroup;
   const ChatPage({
     super.key,
     required this.chatId,
     required this.chatName,
-    required this.chatPhotoUrl,
+    this.chatPhotoUrl,
     required this.isGroup,
   });
 
@@ -66,7 +66,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       (message) => types.TextMessage(
         author: types.User(
           id: message.senderId,
-          firstName: names[message.senderId],
+          firstName: names[message.senderId] ?? 'Deleted User',
           imageUrl: photos[message.senderId],
         ),
         id: message.id,
@@ -87,9 +87,15 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       appBar: AppBar(
         title: Row(
           children: [
-            CircleAvatar(backgroundImage: NetworkImage(widget.chatPhotoUrl)),
+            widget.chatPhotoUrl != null
+                ? CircleAvatar(
+                  backgroundImage: NetworkImage(widget.chatPhotoUrl!),
+                )
+                : CircleAvatar(backgroundColor: Colors.blueGrey),
             const SizedBox(width: 8),
-            Text(widget.chatName.split(' ')[0]),
+            widget.isGroup
+                ? Text(widget.chatName)
+                : Text(widget.chatName.split(' ')[0]),
           ],
         ),
       ),
@@ -109,7 +115,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             onAttachmentPressed: () {
               showModificationModal(context, ref);
             },
-
             theme: DefaultChatTheme(
               secondaryColor: Theme.of(context).colorScheme.surfaceContainer,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,

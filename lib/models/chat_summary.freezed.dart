@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatSummary {
 
- String get chatId; String get chatName; bool get isGroup; String get chatPhoto; String? get lastMessage;
+ String get chatId; String get chatName; bool get isGroup; String? get chatPhoto; String? get lastMessage;
 /// Create a copy of ChatSummary
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $ChatSummaryCopyWith<$Res>  {
   factory $ChatSummaryCopyWith(ChatSummary value, $Res Function(ChatSummary) _then) = _$ChatSummaryCopyWithImpl;
 @useResult
 $Res call({
- String chatId, String chatName, bool isGroup, String chatPhoto, String? lastMessage
+ String chatId, String chatName, bool isGroup, String? chatPhoto, String? lastMessage
 });
 
 
@@ -66,13 +66,13 @@ class _$ChatSummaryCopyWithImpl<$Res>
 
 /// Create a copy of ChatSummary
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? chatId = null,Object? chatName = null,Object? isGroup = null,Object? chatPhoto = null,Object? lastMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? chatId = null,Object? chatName = null,Object? isGroup = null,Object? chatPhoto = freezed,Object? lastMessage = freezed,}) {
   return _then(_self.copyWith(
 chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as String,chatName: null == chatName ? _self.chatName : chatName // ignore: cast_nullable_to_non_nullable
 as String,isGroup: null == isGroup ? _self.isGroup : isGroup // ignore: cast_nullable_to_non_nullable
-as bool,chatPhoto: null == chatPhoto ? _self.chatPhoto : chatPhoto // ignore: cast_nullable_to_non_nullable
-as String,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
+as bool,chatPhoto: freezed == chatPhoto ? _self.chatPhoto : chatPhoto // ignore: cast_nullable_to_non_nullable
+as String?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -84,13 +84,13 @@ as String?,
 @JsonSerializable()
 
 class _ChatSummary implements ChatSummary {
-  const _ChatSummary({required this.chatId, required this.chatName, required this.isGroup, required this.chatPhoto, this.lastMessage});
+  const _ChatSummary({required this.chatId, required this.chatName, required this.isGroup, this.chatPhoto, this.lastMessage});
   factory _ChatSummary.fromJson(Map<String, dynamic> json) => _$ChatSummaryFromJson(json);
 
 @override final  String chatId;
 @override final  String chatName;
 @override final  bool isGroup;
-@override final  String chatPhoto;
+@override final  String? chatPhoto;
 @override final  String? lastMessage;
 
 /// Create a copy of ChatSummary
@@ -126,7 +126,7 @@ abstract mixin class _$ChatSummaryCopyWith<$Res> implements $ChatSummaryCopyWith
   factory _$ChatSummaryCopyWith(_ChatSummary value, $Res Function(_ChatSummary) _then) = __$ChatSummaryCopyWithImpl;
 @override @useResult
 $Res call({
- String chatId, String chatName, bool isGroup, String chatPhoto, String? lastMessage
+ String chatId, String chatName, bool isGroup, String? chatPhoto, String? lastMessage
 });
 
 
@@ -143,13 +143,13 @@ class __$ChatSummaryCopyWithImpl<$Res>
 
 /// Create a copy of ChatSummary
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? chatId = null,Object? chatName = null,Object? isGroup = null,Object? chatPhoto = null,Object? lastMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? chatId = null,Object? chatName = null,Object? isGroup = null,Object? chatPhoto = freezed,Object? lastMessage = freezed,}) {
   return _then(_ChatSummary(
 chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as String,chatName: null == chatName ? _self.chatName : chatName // ignore: cast_nullable_to_non_nullable
 as String,isGroup: null == isGroup ? _self.isGroup : isGroup // ignore: cast_nullable_to_non_nullable
-as bool,chatPhoto: null == chatPhoto ? _self.chatPhoto : chatPhoto // ignore: cast_nullable_to_non_nullable
-as String,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
+as bool,chatPhoto: freezed == chatPhoto ? _self.chatPhoto : chatPhoto // ignore: cast_nullable_to_non_nullable
+as String?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

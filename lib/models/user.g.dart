@@ -10,7 +10,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   id: json['id'] as String,
   name: json['name'] as String,
   username: json['username'] as String,
-  photoUrl: json['photo_url'] as String?,
+  photoUrl: json['photo_url'] as String,
   lastSeen:
       json['last_seen'] == null
           ? null

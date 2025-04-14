@@ -8,11 +8,14 @@ import 'package:http/http.dart' as http;
 part 'api_client.g.dart';
 
 const String baseUrl = 'https://shogoshima.duckdns.org';
+// const String baseUrl = 'http://192.168.15.6:8080';
 
 class ApiRoutes {
   static String chats = '/chats';
   static String summaries = '/chats/summaries';
   static String textFilters = '/chats/textfilters';
+  static String dm = '/chats/dm';
+  static String group = '/chats/group';
 
   static String users = '/users';
   static String login = '/auth/login';
@@ -35,6 +38,11 @@ class ApiClient extends _$ApiClient {
 
   Future<void> removeToken() async {
     await _storage.delete(key: 'jwtToken');
+  }
+
+  Future<bool> hasToken() async {
+    final token = await _storage.read(key: 'jwtToken');
+    return token != null;
   }
 
   Future<dynamic> get(String endpoint, [Map<String, dynamic>? query]) async {
@@ -83,8 +91,8 @@ class ApiClient extends _$ApiClient {
     return _handleResponse(response);
   }
 
-  Future<void> delete(String endpoint, String id) async {
-    final uri = Uri.parse('$baseUrl$endpoint/$id');
+  Future<void> delete(String endpoint) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
     final token = await _storage.read(key: "jwtToken");
 
     final response = await http.delete(

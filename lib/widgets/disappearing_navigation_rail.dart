@@ -21,9 +21,9 @@ class DisappearingNavigationRail extends StatelessWidget {
           label: Text('Chats'),
         ),
         NavigationRailDestination(
-          selectedIcon: Icon(Icons.account_circle_outlined),
-          icon: Icon(Icons.account_circle),
-          label: Text('Account'),
+          selectedIcon: Icon(Icons.settings_outlined),
+          icon: Icon(Icons.settings),
+          label: Text('Settings'),
         ),
       ],
       selectedIndex: selectedIndex,

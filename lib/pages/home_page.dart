@@ -18,7 +18,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   int _currentPageIndex = 0;
   final PageController _pageController = PageController();
-  final List<String> _titles = ['Chats', 'Account'];
+  final List<String> _titles = ['Chats', 'Settings'];
 
   bool wideScreen = false;
 
