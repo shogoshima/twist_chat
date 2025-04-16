@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/api_client.dart';
 import 'package:twist_chat/providers/google_auth.dart';
+import 'package:twist_chat/providers/web_socket.dart';
 
 part 'global_chat.g.dart';
 
@@ -24,6 +25,14 @@ class GlobalChat extends _$GlobalChat {
     return (json['chats'] as List)
         .map((chat) => ChatSummary.fromJson(chat))
         .toList();
+  }
+
+  ChatSummary? getById(String chatId) {
+    final currentState = state.value;
+
+    if (currentState == null) return null;
+
+    return currentState.firstWhere((e) => e.chatId == chatId);
   }
 
   Future<void> fetchNewChat(String chatId) async {
@@ -51,6 +60,12 @@ class GlobalChat extends _$GlobalChat {
 
     final newChat = ChatSummary.fromJson(json['chat']);
 
+    final newAction = WebSocketAction(
+      chatId: newChat.chatId,
+      type: 'refresh_details',
+    );
+    ref.read(webSocketProvider.notifier).sendAction(newAction);
+
     state = AsyncValue.data([newChat, ...state.value ?? []]);
   }
 
@@ -66,6 +81,12 @@ class GlobalChat extends _$GlobalChat {
     }
 
     final newChat = ChatSummary.fromJson(json['chat']);
+
+    final newAction = WebSocketAction(
+      chatId: newChat.chatId,
+      type: 'refresh_details',
+    );
+    ref.read(webSocketProvider.notifier).sendAction(newAction);
 
     state = AsyncValue.data([newChat, ...state.value ?? []]);
   }
@@ -83,6 +104,31 @@ class GlobalChat extends _$GlobalChat {
       final chat = updated.removeAt(index);
       final newChat = chat.copyWith(lastMessage: lastMessage);
       updated.insert(0, newChat);
+    }
+
+    state = AsyncValue.data(updated);
+  }
+
+  Future<void> updateGroupChatInfo(String chatId, String chatName) async {
+    final apiClient = ref.watch(apiClientProvider);
+
+    await apiClient.put('${ApiRoutes.group}/$chatId', {'name': chatName});
+
+    final newAction = WebSocketAction(chatId: chatId, type: 'refresh_summary');
+    ref.read(webSocketProvider.notifier).sendAction(newAction);
+  }
+
+  void deleteChatFromList(String chatId) {
+    final currentState = state.value;
+
+    if (currentState == null) return;
+
+    final updated = List<ChatSummary>.from(currentState);
+
+    // Find the chat and bring it to the front
+    final index = updated.indexWhere((chat) => chat.chatId == chatId);
+    if (index != -1) {
+      updated.removeAt(index);
     }
 
     state = AsyncValue.data(updated);

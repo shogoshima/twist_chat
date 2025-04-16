@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
+import 'package:twist_chat/models/web_socket_action.dart';
 import 'package:twist_chat/providers/global_chat.dart';
 import 'package:twist_chat/providers/google_auth.dart';
 import 'package:twist_chat/providers/single_chat.dart';
@@ -11,8 +12,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 part 'web_socket.g.dart';
 
-const String wsUrl = 'wss://shogoshima.duckdns.org/ws';
-// const String wsUrl = 'ws://192.168.15.6:8080/ws';
+// const String wsUrl = 'wss://shogoshima.duckdns.org/ws';
+const String wsUrl = 'ws://192.168.15.6:8080/ws';
 
 @riverpod
 class WebSocket extends _$WebSocket {
@@ -84,6 +85,15 @@ class WebSocket extends _$WebSocket {
       if (decoded['type'] == 'error') {
         final msg = decoded['payload']['message'];
         throw Exception(msg);
+      } else if (decoded['type'] == 'action') {
+        final action = WebSocketAction.fromJson(decoded['payload']);
+        debugPrint(action.toString());
+        if (action.type == 'refresh_summary') {
+          ref.invalidate(globalChatProvider);
+        } else if (action.type == 'refresh_details') {
+          ref.invalidate(globalChatProvider);
+          ref.invalidate(singleChatProvider(action.chatId));
+        }
       } else {
         final message = WebSocketMessage.fromJson(decoded['payload']);
 
@@ -120,11 +130,20 @@ class WebSocket extends _$WebSocket {
   /// If no channel is active, you might consider queuing the messages.
   void sendMessage(WebSocketMessage message) {
     if (_channel != null) {
-      _channel!.sink.add(jsonEncode(message));
+      _channel!.sink.add(jsonEncode({'type': 'message', 'data': message}));
       debugPrint('Sent message');
     } else {
       debugPrint('Connection not established. Message not sent.');
       // Optionally implement a queuing mechanism here.
+    }
+  }
+
+  void sendAction(WebSocketAction action) {
+    if (_channel != null) {
+      _channel!.sink.add(jsonEncode({'type': 'action', 'data': action}));
+      debugPrint('Sent action');
+    } else {
+      debugPrint('Connection not established. Action not sent.');
     }
   }
 }

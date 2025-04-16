@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
 class ProfileCard extends StatelessWidget {
-  final String? name;
-  final String? username;
-  final String? photoUrl;
+  final String name;
+  final String username;
+  final String photoUrl;
 
-  const ProfileCard({super.key, this.name, this.username, this.photoUrl});
+  const ProfileCard({
+    super.key,
+    required this.name,
+    required this.username,
+    required this.photoUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,17 +20,11 @@ class ProfileCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            CircleAvatar(
-              backgroundImage: NetworkImage(photoUrl ?? ''),
-              radius: 40,
-            ),
+            CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 40),
             const SizedBox(height: 5),
-            Text(name ?? 'No Name'),
+            Text(name),
             const SizedBox(height: 2),
-            Text(
-              username ?? 'No Username',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            Text(username, style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),

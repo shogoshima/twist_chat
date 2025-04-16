@@ -49,7 +49,7 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
                                       ),
                                     )
                                     : CircleAvatar(
-                                      backgroundColor: Colors.blueGrey,
+                                      backgroundColor: Colors.black,
                                     ),
                             title: Text(chatSummary.chatName),
                             subtitle:
@@ -60,15 +60,13 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
                                       overflow: TextOverflow.ellipsis,
                                     )
                                     : const Text('No messages'),
-                            onTap: () {
+                            onTap: () async {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder:
                                       (context) => ChatPage(
                                         chatId: chatSummary.chatId,
-                                        chatName: chatSummary.chatName,
-                                        chatPhotoUrl: chatSummary.chatPhoto,
                                         isGroup: chatSummary.isGroup,
                                       ),
                                 ),

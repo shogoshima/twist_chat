@@ -16,13 +16,13 @@ class DisappearingBottomNavigationBar extends StatelessWidget {
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       destinations: const <NavigationDestination>[
         NavigationDestination(
-          selectedIcon: Icon(Icons.chat_outlined),
-          icon: Icon(Icons.chat),
+          selectedIcon: Icon(Icons.chat),
+          icon: Icon(Icons.chat_outlined),
           label: 'Chats',
         ),
         NavigationDestination(
-          selectedIcon: Icon(Icons.settings_outlined),
-          icon: Icon(Icons.settings),
+          selectedIcon: Icon(Icons.settings),
+          icon: Icon(Icons.settings_outlined),
           label: 'Settings',
         ),
       ],

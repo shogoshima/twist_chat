@@ -16,13 +16,13 @@ class DisappearingNavigationRail extends StatelessWidget {
       groupAlignment: -1,
       destinations: const <NavigationRailDestination>[
         NavigationRailDestination(
-          selectedIcon: Icon(Icons.chat_outlined),
-          icon: Icon(Icons.chat),
+          selectedIcon: Icon(Icons.chat),
+          icon: Icon(Icons.chat_outlined),
           label: Text('Chats'),
         ),
         NavigationRailDestination(
-          selectedIcon: Icon(Icons.settings_outlined),
-          icon: Icon(Icons.settings),
+          selectedIcon: Icon(Icons.settings),
+          icon: Icon(Icons.settings_outlined),
           label: Text('Settings'),
         ),
       ],

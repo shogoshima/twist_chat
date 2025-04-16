@@ -36,7 +36,10 @@ class AccountPage extends ConsumerWidget {
               children: [
                 ListTile(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ),
                   ),
                   title: Text('Delete records'),
                   onTap: () {
@@ -52,7 +55,10 @@ class AccountPage extends ConsumerWidget {
                 ),
                 ListTile(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
                   ),
                   title: Text('Logout'),
                   onTap: () {

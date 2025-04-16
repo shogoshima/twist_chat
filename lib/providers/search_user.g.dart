@@ -6,7 +6,7 @@ part of 'search_user.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$searchUserHash() => r'0b4d18bea43987725c3992d353ae45232903c1b6';
+String _$searchUserHash() => r'4c5be74555852ff60a00499c9d1e60810e9694e2';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -29,22 +29,16 @@ class _SystemHash {
   }
 }
 
-abstract class _$SearchUser extends BuildlessAutoDisposeAsyncNotifier<User?> {
-  late final String username;
-
-  FutureOr<User?> build(String username);
-}
-
-/// See also [SearchUser].
-@ProviderFor(SearchUser)
+/// See also [searchUser].
+@ProviderFor(searchUser)
 const searchUserProvider = SearchUserFamily();
 
-/// See also [SearchUser].
+/// See also [searchUser].
 class SearchUserFamily extends Family<AsyncValue<User?>> {
-  /// See also [SearchUser].
+  /// See also [searchUser].
   const SearchUserFamily();
 
-  /// See also [SearchUser].
+  /// See also [searchUser].
   SearchUserProvider call(String username) {
     return SearchUserProvider(username);
   }
@@ -71,13 +65,12 @@ class SearchUserFamily extends Family<AsyncValue<User?>> {
   String? get name => r'searchUserProvider';
 }
 
-/// See also [SearchUser].
-class SearchUserProvider
-    extends AutoDisposeAsyncNotifierProviderImpl<SearchUser, User?> {
-  /// See also [SearchUser].
+/// See also [searchUser].
+class SearchUserProvider extends AutoDisposeFutureProvider<User?> {
+  /// See also [searchUser].
   SearchUserProvider(String username)
     : this._internal(
-        () => SearchUser()..username = username,
+        (ref) => searchUser(ref as SearchUserRef, username),
         from: searchUserProvider,
         name: r'searchUserProvider',
         debugGetCreateSourceHash:
@@ -102,16 +95,13 @@ class SearchUserProvider
   final String username;
 
   @override
-  FutureOr<User?> runNotifierBuild(covariant SearchUser notifier) {
-    return notifier.build(username);
-  }
-
-  @override
-  Override overrideWith(SearchUser Function() create) {
+  Override overrideWith(
+    FutureOr<User?> Function(SearchUserRef provider) create,
+  ) {
     return ProviderOverride(
       origin: this,
       override: SearchUserProvider._internal(
-        () => create()..username = username,
+        (ref) => create(ref as SearchUserRef),
         from: from,
         name: null,
         dependencies: null,
@@ -123,7 +113,7 @@ class SearchUserProvider
   }
 
   @override
-  AutoDisposeAsyncNotifierProviderElement<SearchUser, User?> createElement() {
+  AutoDisposeFutureProviderElement<User?> createElement() {
     return _SearchUserProviderElement(this);
   }
 
@@ -143,13 +133,12 @@ class SearchUserProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SearchUserRef on AutoDisposeAsyncNotifierProviderRef<User?> {
+mixin SearchUserRef on AutoDisposeFutureProviderRef<User?> {
   /// The parameter `username` of this provider.
   String get username;
 }
 
-class _SearchUserProviderElement
-    extends AutoDisposeAsyncNotifierProviderElement<SearchUser, User?>
+class _SearchUserProviderElement extends AutoDisposeFutureProviderElement<User?>
     with SearchUserRef {
   _SearchUserProviderElement(super.provider);
 

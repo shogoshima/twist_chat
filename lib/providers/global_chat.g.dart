@@ -6,7 +6,7 @@ part of 'global_chat.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$globalChatHash() => r'9085af46353c1891ecb2b14cea8373a7341e068e';
+String _$globalChatHash() => r'4e97b1529a55d9c69d362c34776c376e7cbd97a4';
 
 /// See also [GlobalChat].
 @ProviderFor(GlobalChat)
