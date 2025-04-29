@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:twist_chat/models/models.dart';
 
-Future<void> showUserDialog(BuildContext context, User user) async {
+Future<void> showUserDialog(BuildContext context, Profile user) async {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
@@ -15,7 +15,7 @@ Future<void> showUserDialog(BuildContext context, User user) async {
               radius: 50,
             ),
             const SizedBox(height: 10),
-            Text(user.name),
+            Text(user.displayName),
             const SizedBox(height: 4),
             Text(user.username, style: TextStyle(fontWeight: FontWeight.bold)),
           ],

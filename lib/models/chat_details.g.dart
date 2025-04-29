@@ -14,7 +14,7 @@ _ChatDetails _$ChatDetailsFromJson(Map<String, dynamic> json) => _ChatDetails(
           .toList(),
   participants:
       (json['participants'] as List<dynamic>)
-          .map((e) => User.fromJson(e as Map<String, dynamic>))
+          .map((e) => Profile.fromJson(e as Map<String, dynamic>))
           .toList(),
   page: (json['page'] as num).toInt(),
   pageSize: (json['page_size'] as num).toInt(),

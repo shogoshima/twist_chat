@@ -11,7 +11,7 @@ abstract class ChatDetails with _$ChatDetails {
   const factory ChatDetails({
     required String chatId,
     required List<Message> messages,
-    required List<User> participants,
+    required List<Profile> participants,
     required int page,
     required int pageSize,
   }) = _ChatDetails;

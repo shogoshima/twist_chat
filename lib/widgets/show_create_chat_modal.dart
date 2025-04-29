@@ -1,10 +1,10 @@
 import 'dart:developer';
 import 'package:avatar_stack/animated_avatar_stack.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/global_chat.dart';
-import 'package:twist_chat/providers/google_auth.dart';
 import 'package:twist_chat/providers/search_user.dart';
 
 Future<void> showCreateChatModal(BuildContext context, WidgetRef ref) {
@@ -14,9 +14,9 @@ Future<void> showCreateChatModal(BuildContext context, WidgetRef ref) {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   // Current logged in user.
-  final user = ref.read(googleAuthProvider).value;
+  final user = FirebaseAuth.instance.currentUser!;
   // In-memory selected users list.
-  List<User> selectedUsers = [];
+  List<Profile> selectedUsers = [];
 
   return showModalBottomSheet<void>(
     context: context,
@@ -37,7 +37,7 @@ Future<void> showCreateChatModal(BuildContext context, WidgetRef ref) {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildHeader(context),
-                  _buildSelectedUsers(user!, selectedUsers),
+                  _buildSelectedUsers(user, selectedUsers),
                   _buildSearchField(
                     context,
                     ref,
@@ -88,14 +88,14 @@ Widget _buildHeader(BuildContext context) {
 }
 
 // SELECTED USERS: Display the current selected users using AnimatedAvatarStack.
-Widget _buildSelectedUsers(User currentUser, List<User> selectedUsers) {
+Widget _buildSelectedUsers(User currentUser, List<Profile> selectedUsers) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
     child: AnimatedAvatarStack(
       height: 60,
       avatars: [
         // The current user's photo is always shown.
-        NetworkImage(currentUser.photoUrl),
+        NetworkImage(currentUser.photoURL!),
         // Then add the selected users.
         for (var user in selectedUsers) NetworkImage(user.photoUrl),
       ],
@@ -108,7 +108,7 @@ Widget _buildSearchField(
   BuildContext context,
   WidgetRef ref,
   TextEditingController usernameController,
-  List<User> selectedUsers,
+  List<Profile> selectedUsers,
   StateSetter setState,
 ) {
   return Padding(
@@ -130,7 +130,7 @@ Widget _buildSearchField(
                 );
                 if (userData == null) return;
                 // Only add if not already in list and not the current user.
-                if (userData != ref.read(googleAuthProvider).value &&
+                if (userData.id != FirebaseAuth.instance.currentUser!.uid &&
                     !selectedUsers.contains(userData)) {
                   setState(() {
                     selectedUsers.add(userData);
@@ -152,7 +152,7 @@ Widget _buildSearchField(
 Widget _buildGroupNameInput(
   GlobalKey<FormState> formKey,
   TextEditingController groupNameController,
-  List<User> selectedUsers,
+  List<Profile> selectedUsers,
 ) {
   return AnimatedSwitcher(
     duration: const Duration(milliseconds: 300),
@@ -197,7 +197,7 @@ Widget _buildGroupNameInput(
 Widget _buildCreateChatButton(
   BuildContext context,
   WidgetRef ref,
-  List<User> selectedUsers,
+  List<Profile> selectedUsers,
   TextEditingController groupNameController,
   GlobalKey<FormState> formKey,
 ) {

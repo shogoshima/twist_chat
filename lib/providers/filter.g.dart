@@ -6,11 +6,11 @@ part of 'filter.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$filterHash() => r'7206faba01fc11ca62288facce8aa206dd3a2eb2';
+String _$filterHash() => r'9508d9bd65e273ffed0bb0f27ed98757fd79eae0';
 
 /// See also [filter].
 @ProviderFor(filter)
-final filterProvider = AutoDisposeFutureProvider<List<TextFilter>>.internal(
+final filterProvider = AutoDisposeFutureProvider<List<Filter>>.internal(
   filter,
   name: r'filterProvider',
   debugGetCreateSourceHash:
@@ -21,6 +21,6 @@ final filterProvider = AutoDisposeFutureProvider<List<TextFilter>>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef FilterRef = AutoDisposeFutureProviderRef<List<TextFilter>>;
+typedef FilterRef = AutoDisposeFutureProviderRef<List<Filter>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

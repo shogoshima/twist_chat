@@ -10,10 +10,10 @@ Future<void> showAddUserModal(
   BuildContext context,
   WidgetRef ref,
   String chatId,
-  List<User> presentParticipants,
+  List<Profile> presentParticipants,
 ) {
   final TextEditingController usernameController = TextEditingController();
-  List<User> selectedUsers = [];
+  List<Profile> selectedUsers = [];
 
   return showModalBottomSheet<void>(
     context: context,
@@ -82,7 +82,7 @@ Widget _buildHeader(BuildContext context) {
 }
 
 // Display selected user avatars with an AnimatedSwitcher.
-Widget _buildSelectedUsersPreview(List<User> selectedUsers) {
+Widget _buildSelectedUsersPreview(List<Profile> selectedUsers) {
   return AnimatedSwitcher(
     duration: Duration(milliseconds: 300),
     transitionBuilder: (Widget child, Animation<double> animation) {
@@ -115,8 +115,8 @@ Widget _buildUserSearchField(
   BuildContext context,
   WidgetRef ref,
   TextEditingController usernameController,
-  List<User> presentParticipants,
-  List<User> selectedUsers,
+  List<Profile> presentParticipants,
+  List<Profile> selectedUsers,
   StateSetter setState,
 ) {
   return Padding(
@@ -161,7 +161,7 @@ Widget _buildAddParticipantsButton(
   BuildContext context,
   WidgetRef ref,
   String chatId,
-  List<User> selectedUsers,
+  List<Profile> selectedUsers,
 ) {
   return AnimatedSwitcher(
     duration: Duration(milliseconds: 300),

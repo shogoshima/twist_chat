@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,7 +6,6 @@ import 'package:twist_chat/models/chat_details.dart' as models;
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/active_filter.dart';
 import 'package:twist_chat/providers/global_chat.dart';
-import 'package:twist_chat/providers/google_auth.dart';
 import 'package:twist_chat/providers/single_chat.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:twist_chat/providers/web_socket.dart';
@@ -34,7 +34,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final newMessage = WebSocketMessage(
       id: Uuid().v4(),
       chatId: widget.chatId,
-      senderId: ref.watch(googleAuthProvider).value!.id,
+      senderId: FirebaseAuth.instance.currentUser!.uid,
       sentAt: DateTime.now().toUtc(),
       text: message.text,
       textFilterId: ref.watch(activeFilterProvider),
@@ -53,7 +53,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final Map<String, String> names = {};
     final Map<String, String?> photos = {};
     for (final participant in participants) {
-      names[participant.id] = participant.name;
+      names[participant.id] = participant.displayName;
       photos[participant.id] = participant.photoUrl;
     }
     final messagesFormatted = messages.map(
@@ -105,7 +105,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                           AsyncData(:final value) => FadingTextButton(
                             title: summary.chatName,
                             content: value.participants
-                                .map((participant) => participant.name)
+                                .map((participant) => participant.displayName)
                                 .join(', '),
                             onTap: () async {
                               await showGroupChatModal(
@@ -143,7 +143,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final AsyncValue<ChatDetails> chatDetails = ref.watch(
       singleChatProvider(widget.chatId),
     );
-    final user = ref.watch(googleAuthProvider).value;
+    final user = FirebaseAuth.instance.currentUser!;
     return Scaffold(
       appBar: _buildAppBar(),
       body: Center(
@@ -151,7 +151,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           AsyncData(:final value) => Chat(
             messages: _formatMessages(value),
             onSendPressed: _handleSendPressed,
-            user: types.User(id: user!.id),
+            user: types.User(id: user.uid),
             showUserAvatars: widget.isGroup,
             showUserNames: widget.isGroup,
             onEndReached: () async {

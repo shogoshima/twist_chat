@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user.dart';
+part of 'profile.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_User _$UserFromJson(Map<String, dynamic> json) => _User(
+_Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   id: json['id'] as String,
-  name: json['name'] as String,
+  displayName: json['display_name'] as String,
   username: json['username'] as String,
   photoUrl: json['photo_url'] as String,
   lastSeen:
@@ -17,9 +17,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
           : DateTime.parse(json['last_seen'] as String),
 );
 
-Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
+Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'id': instance.id,
-  'name': instance.name,
+  'display_name': instance.displayName,
   'username': instance.username,
   'photo_url': instance.photoUrl,
   'last_seen': instance.lastSeen?.toIso8601String(),

@@ -1,24 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
-import 'package:twist_chat/models/web_socket_action.dart';
+import 'package:twist_chat/models/web_socket_authentication.dart';
 import 'package:twist_chat/providers/global_chat.dart';
-import 'package:twist_chat/providers/google_auth.dart';
 import 'package:twist_chat/providers/single_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 part 'web_socket.g.dart';
 
 // const String wsUrl = 'wss://shogoshima.duckdns.org/ws';
-const String wsUrl = 'ws://192.168.15.6:8080/ws';
+const String wsUrl = 'ws://10.0.2.2:8080/ws';
 
 @riverpod
 class WebSocket extends _$WebSocket {
   WebSocketChannel? _channel;
   String? _userId;
+  String? _idToken;
   Timer? _reconnectTimer;
   final Duration _reconnectDelay = const Duration(seconds: 1);
 
@@ -31,13 +32,18 @@ class WebSocket extends _$WebSocket {
       _channel?.sink.close();
       _channel = null;
       _userId = null;
+      _idToken = null;
     });
 
     // Watch the authentication provider.
-    final User? user = ref.watch(googleAuthProvider).value;
+    final User? user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
 
-    _userId = user.id;
+    _idToken = await user.getIdToken();
+    _userId = user.uid;
+
+    if (_idToken == null || _userId == null) return null;
+
     await _connect();
 
     return _channel;
@@ -47,6 +53,8 @@ class WebSocket extends _$WebSocket {
   Future<void> _connect() async {
     try {
       _channel = WebSocketChannel.connect(Uri.parse('$wsUrl/$_userId'));
+
+      sendAuthentication();
 
       // Update our state with the new channel.
       state = AsyncData(_channel);
@@ -60,7 +68,7 @@ class WebSocket extends _$WebSocket {
         },
         onDone: () {
           debugPrint('WebSocket closed');
-          _scheduleReconnect();
+          // _scheduleReconnect();
         },
       );
     } catch (e, stackTrace) {
@@ -144,6 +152,18 @@ class WebSocket extends _$WebSocket {
       debugPrint('Sent action');
     } else {
       debugPrint('Connection not established. Action not sent.');
+    }
+  }
+
+  void sendAuthentication() {
+    if (_channel != null && _idToken != null) {
+      final authentication = WebSocketAuthentication(idToken: _idToken!);
+      _channel!.sink.add(
+        jsonEncode({'type': 'authentication', 'data': authentication}),
+      );
+      debugPrint('Sent action');
+    } else {
+      debugPrint('Connection not established. Authentication not sent.');
     }
   }
 }

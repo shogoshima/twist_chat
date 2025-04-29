@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twist_chat/providers/google_auth.dart';
+import 'package:twist_chat/providers/auth.dart';
 
 class SignInButton extends ConsumerWidget {
   const SignInButton({super.key});
@@ -8,11 +8,11 @@ class SignInButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch the state of the GoogleAuth provider
-    final googleAuthState = ref.watch(googleAuthProvider);
+    final authState = ref.watch(authProvider);
 
     // Determine if the provider is currently in a loading state.
     // Using maybeWhen lets you easily extract the loading condition.
-    final isSigningIn = googleAuthState.maybeWhen(
+    final isSigningIn = authState.maybeWhen(
       loading: () => true,
       orElse: () => false,
     );
@@ -24,7 +24,7 @@ class SignInButton extends ConsumerWidget {
               ? null
               : () async {
                 try {
-                  await ref.read(googleAuthProvider.notifier).login();
+                  await ref.read(authProvider.notifier).login();
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(

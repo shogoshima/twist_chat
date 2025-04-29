@@ -192,7 +192,7 @@ Widget _buildParticipantsList(ChatDetails details) {
             );
           }
 
-          final User participant = details.participants[index - 1];
+          final Profile participant = details.participants[index - 1];
           if (index == details.participants.length) {
             return ListTile(
               shape: RoundedRectangleBorder(
@@ -204,9 +204,9 @@ Widget _buildParticipantsList(ChatDetails details) {
               leading: CircleAvatar(
                 backgroundImage: NetworkImage(participant.photoUrl),
               ),
-              title: Text(participant.name, overflow: TextOverflow.fade),
+              title: Text(participant.displayName, overflow: TextOverflow.fade),
               onTap: () async {
-                User? user = await ref.read(
+                Profile? user = await ref.read(
                   searchUserProvider(participant.username).future,
                 );
                 if (user != null) {
@@ -220,9 +220,9 @@ Widget _buildParticipantsList(ChatDetails details) {
             leading: CircleAvatar(
               backgroundImage: NetworkImage(participant.photoUrl),
             ),
-            title: Text(participant.name, overflow: TextOverflow.fade),
+            title: Text(participant.displayName, overflow: TextOverflow.fade),
             onTap: () async {
-              User? user = await ref.read(
+              Profile? user = await ref.read(
                 searchUserProvider(participant.username).future,
               );
               if (user != null) {

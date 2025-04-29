@@ -1,19 +1,19 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'user.freezed.dart';
-part 'user.g.dart';
+part 'profile.freezed.dart';
+part 'profile.g.dart';
 
 /// For the backend database
 /// When the user logs in, this is the schema
 @freezed
-abstract class User with _$User {
-  const factory User({
+abstract class Profile with _$Profile {
+  const factory Profile({
     required String id,
-    required String name,
+    required String displayName,
     required String username,
     required String photoUrl,
     DateTime? lastSeen
-  }) = _User;
+  }) = _Profile;
 
-  factory User.fromJson(Map<String, Object?> json) => _$UserFromJson(json);
+  factory Profile.fromJson(Map<String, Object?> json) => _$ProfileFromJson(json);
 }

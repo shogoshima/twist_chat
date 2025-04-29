@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 // Necessary for code-generation to work
 part 'api_client.g.dart';
 
 // const String baseUrl = 'https://shogoshima.duckdns.org';
-const String baseUrl = 'http://192.168.15.6:8080';
+const String baseUrl = 'http://10.0.2.2:8080';
 
 class ApiRoutes {
   static String chats = '/chats';
@@ -17,43 +17,29 @@ class ApiRoutes {
   static String dm = '/chats/dm';
   static String group = '/chats/group';
 
+  static String login = '/login';
+  
   static String users = '/users';
-  static String login = '/auth/login';
   static String me = '/users/me';
 }
 
 @Riverpod(keepAlive: true)
 class ApiClient extends _$ApiClient {
-  late final FlutterSecureStorage _storage;
 
   @override
   ApiClient build() {
-    _storage = const FlutterSecureStorage();
     return this;
-  }
-
-  Future<void> setToken(String token) async {
-    await _storage.write(key: 'jwtToken', value: token);
-  }
-
-  Future<void> removeToken() async {
-    await _storage.delete(key: 'jwtToken');
-  }
-
-  Future<bool> hasToken() async {
-    final token = await _storage.read(key: 'jwtToken');
-    return token != null;
   }
 
   Future<dynamic> get(String endpoint, [Map<String, dynamic>? query]) async {
     final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: query);
-    final token = await _storage.read(key: 'jwtToken');
+    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
     final response = await http.get(
       uri,
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
-        if (token != null) 'Authorization': 'Bearer $token',
+        if (idToken != null) 'Authorization': 'Bearer $idToken',
       },
     );
 
@@ -62,13 +48,13 @@ class ApiClient extends _$ApiClient {
 
   Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    final token = await _storage.read(key: "jwtToken");
+    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
     final response = await http.post(
       uri,
       headers: {
         'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
+        if (idToken != null) 'Authorization': 'Bearer $idToken',
       },
       body: jsonEncode(data),
     );
@@ -77,13 +63,13 @@ class ApiClient extends _$ApiClient {
 
   Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    final token = await _storage.read(key: "jwtToken");
+    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
     final response = await http.put(
       uri,
       headers: {
         'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
+        if (idToken != null) 'Authorization': 'Bearer $idToken',
       },
       body: jsonEncode(data),
     );
@@ -93,13 +79,13 @@ class ApiClient extends _$ApiClient {
 
   Future<void> delete(String endpoint) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    final token = await _storage.read(key: "jwtToken");
+    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
     final response = await http.delete(
       uri,
       headers: {
         'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
+        if (idToken != null) 'Authorization': 'Bearer $idToken',
       },
     );
 

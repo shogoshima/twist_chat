@@ -1,24 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'api_client.dart';
+part of 'profile.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$apiClientHash() => r'c8ae956de1eb19720440c128cf143ac7f39f3e73';
+String _$profileHash() => r'951d257f6dedeeed7409cf1fb70cbd5590c80d66';
 
-/// See also [ApiClient].
-@ProviderFor(ApiClient)
-final apiClientProvider = NotifierProvider<ApiClient, ApiClient>.internal(
-  ApiClient.new,
-  name: r'apiClientProvider',
+/// See also [profile].
+@ProviderFor(profile)
+final profileProvider = AutoDisposeFutureProvider<Profile?>.internal(
+  profile,
+  name: r'profileProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$apiClientHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$profileHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$ApiClient = Notifier<ApiClient>;
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProfileRef = AutoDisposeFutureProviderRef<Profile?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

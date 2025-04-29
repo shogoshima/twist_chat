@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatDetails {
 
- String get chatId; List<Message> get messages; List<User> get participants; int get page; int get pageSize;
+ String get chatId; List<Message> get messages; List<Profile> get participants; int get page; int get pageSize;
 /// Create a copy of ChatDetails
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $ChatDetailsCopyWith<$Res>  {
   factory $ChatDetailsCopyWith(ChatDetails value, $Res Function(ChatDetails) _then) = _$ChatDetailsCopyWithImpl;
 @useResult
 $Res call({
- String chatId, List<Message> messages, List<User> participants, int page, int pageSize
+ String chatId, List<Message> messages, List<Profile> participants, int page, int pageSize
 });
 
 
@@ -71,7 +71,7 @@ class _$ChatDetailsCopyWithImpl<$Res>
 chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as String,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
 as List<Message>,participants: null == participants ? _self.participants : participants // ignore: cast_nullable_to_non_nullable
-as List<User>,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as List<Profile>,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,pageSize: null == pageSize ? _self.pageSize : pageSize // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -84,7 +84,7 @@ as int,
 @JsonSerializable()
 
 class _ChatDetails implements ChatDetails {
-  const _ChatDetails({required this.chatId, required final  List<Message> messages, required final  List<User> participants, required this.page, required this.pageSize}): _messages = messages,_participants = participants;
+  const _ChatDetails({required this.chatId, required final  List<Message> messages, required final  List<Profile> participants, required this.page, required this.pageSize}): _messages = messages,_participants = participants;
   factory _ChatDetails.fromJson(Map<String, dynamic> json) => _$ChatDetailsFromJson(json);
 
 @override final  String chatId;
@@ -95,8 +95,8 @@ class _ChatDetails implements ChatDetails {
   return EqualUnmodifiableListView(_messages);
 }
 
- final  List<User> _participants;
-@override List<User> get participants {
+ final  List<Profile> _participants;
+@override List<Profile> get participants {
   if (_participants is EqualUnmodifiableListView) return _participants;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_participants);
@@ -138,7 +138,7 @@ abstract mixin class _$ChatDetailsCopyWith<$Res> implements $ChatDetailsCopyWith
   factory _$ChatDetailsCopyWith(_ChatDetails value, $Res Function(_ChatDetails) _then) = __$ChatDetailsCopyWithImpl;
 @override @useResult
 $Res call({
- String chatId, List<Message> messages, List<User> participants, int page, int pageSize
+ String chatId, List<Message> messages, List<Profile> participants, int page, int pageSize
 });
 
 
@@ -160,7 +160,7 @@ class __$ChatDetailsCopyWithImpl<$Res>
 chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as String,messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
 as List<Message>,participants: null == participants ? _self._participants : participants // ignore: cast_nullable_to_non_nullable
-as List<User>,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as List<Profile>,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,pageSize: null == pageSize ? _self.pageSize : pageSize // ignore: cast_nullable_to_non_nullable
 as int,
   ));

@@ -1,7 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twist_chat/models/models.dart';
-import 'package:twist_chat/providers/google_auth.dart';
+import 'package:twist_chat/providers/auth.dart';
 import 'package:twist_chat/widgets/profile_card.dart';
 import 'package:twist_chat/widgets/show_dialog.dart';
 
@@ -10,24 +10,14 @@ class AccountPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<User?> user = ref.watch(googleAuthProvider);
+    final currentUser = FirebaseAuth.instance.currentUser!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Center(
-          child: switch (user) {
-            AsyncData(:final value) => Column(
-              children: [
-                ProfileCard(
-                  name: value!.name,
-                  username: value.username,
-                  photoUrl: value.photoUrl,
-                ),
-              ],
-            ),
-            AsyncError() => const Text('Oops, something unexpected happened'),
-            _ => const CircularProgressIndicator(),
-          },
+        ProfileCard(
+          name: currentUser.displayName!,
+          username: currentUser.email!.split('@')[0],
+          photoUrl: currentUser.photoURL!,
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -48,7 +38,7 @@ class AccountPage extends ConsumerWidget {
                       'Delete records',
                       'This will erase all your data and conversations for good. There’s no way to get them back.\n\nDo you really want to go ahead?',
                       () {
-                        ref.read(googleAuthProvider.notifier).delete();
+                        ref.read(authProvider.notifier).delete();
                       },
                     );
                   },
@@ -62,7 +52,7 @@ class AccountPage extends ConsumerWidget {
                   ),
                   title: Text('Logout'),
                   onTap: () {
-                    ref.read(googleAuthProvider.notifier).logout();
+                    ref.read(authProvider.notifier).logout();
                   },
                 ),
               ],

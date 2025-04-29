@@ -6,7 +6,7 @@ part of 'web_socket.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$webSocketHash() => r'6218117bb1709de465555e5f295cca3d9d7f24a8';
+String _$webSocketHash() => r'e9dac0a60ddcf9e426851f5fdd84febb0203b067';
 
 /// See also [WebSocket].
 @ProviderFor(WebSocket)

@@ -1,24 +1,24 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'api_client.dart';
+part of 'auth.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$apiClientHash() => r'c8ae956de1eb19720440c128cf143ac7f39f3e73';
+String _$authHash() => r'cdc67cc4d361ef472f1326195cd416b31b5cdecb';
 
-/// See also [ApiClient].
-@ProviderFor(ApiClient)
-final apiClientProvider = NotifierProvider<ApiClient, ApiClient>.internal(
-  ApiClient.new,
-  name: r'apiClientProvider',
+/// See also [Auth].
+@ProviderFor(Auth)
+final authProvider = AutoDisposeAsyncNotifierProvider<Auth, User?>.internal(
+  Auth.new,
+  name: r'authProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$apiClientHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$authHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$ApiClient = Notifier<ApiClient>;
+typedef _$Auth = AutoDisposeAsyncNotifier<User?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

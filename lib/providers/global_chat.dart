@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/api_client.dart';
-import 'package:twist_chat/providers/google_auth.dart';
 import 'package:twist_chat/providers/web_socket.dart';
 
 part 'global_chat.g.dart';
@@ -11,10 +10,6 @@ class GlobalChat extends _$GlobalChat {
   @override
   Future<List<ChatSummary>> build() async {
     final apiClient = ref.watch(apiClientProvider);
-    ref.watch(googleAuthProvider);
-
-    final hasToken = await apiClient.hasToken();
-    if (!hasToken) return [];
 
     // Fetch all the chats (metadata)
     final json = await apiClient.get(ApiRoutes.summaries);

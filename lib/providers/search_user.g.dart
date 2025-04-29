@@ -6,7 +6,7 @@ part of 'search_user.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$searchUserHash() => r'4c5be74555852ff60a00499c9d1e60810e9694e2';
+String _$searchUserHash() => r'e0a7fc651c03c8e35958adc38c5fcfbe3c420ed6';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,7 +34,7 @@ class _SystemHash {
 const searchUserProvider = SearchUserFamily();
 
 /// See also [searchUser].
-class SearchUserFamily extends Family<AsyncValue<User?>> {
+class SearchUserFamily extends Family<AsyncValue<Profile?>> {
   /// See also [searchUser].
   const SearchUserFamily();
 
@@ -66,7 +66,7 @@ class SearchUserFamily extends Family<AsyncValue<User?>> {
 }
 
 /// See also [searchUser].
-class SearchUserProvider extends AutoDisposeFutureProvider<User?> {
+class SearchUserProvider extends AutoDisposeFutureProvider<Profile?> {
   /// See also [searchUser].
   SearchUserProvider(String username)
     : this._internal(
@@ -96,7 +96,7 @@ class SearchUserProvider extends AutoDisposeFutureProvider<User?> {
 
   @override
   Override overrideWith(
-    FutureOr<User?> Function(SearchUserRef provider) create,
+    FutureOr<Profile?> Function(SearchUserRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -113,7 +113,7 @@ class SearchUserProvider extends AutoDisposeFutureProvider<User?> {
   }
 
   @override
-  AutoDisposeFutureProviderElement<User?> createElement() {
+  AutoDisposeFutureProviderElement<Profile?> createElement() {
     return _SearchUserProviderElement(this);
   }
 
@@ -133,12 +133,13 @@ class SearchUserProvider extends AutoDisposeFutureProvider<User?> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SearchUserRef on AutoDisposeFutureProviderRef<User?> {
+mixin SearchUserRef on AutoDisposeFutureProviderRef<Profile?> {
   /// The parameter `username` of this provider.
   String get username;
 }
 
-class _SearchUserProviderElement extends AutoDisposeFutureProviderElement<User?>
+class _SearchUserProviderElement
+    extends AutoDisposeFutureProviderElement<Profile?>
     with SearchUserRef {
   _SearchUserProviderElement(super.provider);
 

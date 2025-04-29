@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "1093568117572",
+    "project_id": "twistchat-74696",
+    "storage_bucket": "twistchat-74696.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1093568117572:android:26b89b030695c11c31f511",
+        "android_client_info": {
+          "package_name": "com.shogoshima.twistchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1093568117572-d8o8l0bsvt8mfng0rgkobh46je9ricpb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shogoshima.twistchat",
+            "certificate_hash": "9bf11e22a945c3ddb693f5e1325ca07b298850e4"
+          }
+        },
+        {
+          "client_id": "1093568117572-eo4smldlcf95hqdpstj34lms6c0ajc40.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shogoshima.twistchat",
+            "certificate_hash": "a1439e6ea6ff1ec67642c03befecc97d75f30605"
+          }
+        },
+        {
+          "client_id": "1093568117572-il3pjgug2chl4e8gm8ama0hsqtirb6ns.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shogoshima.twistchat",
+            "certificate_hash": "b68759a5820d7ae73a235384332f1f0b58d53790"
+          }
+        },
+        {
+          "client_id": "1093568117572-40maskp6hkd1ct2og2mk880ooh0a71bt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDh5WpVk-IgKhRwHPjwXPy3QYeX8EJ1oQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1093568117572-40maskp6hkd1ct2og2mk880ooh0a71bt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1093568117572-ff1qdrapru3upatvav09l5ngmqsl4l67.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shogoshima.twistchat"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
