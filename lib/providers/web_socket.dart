@@ -13,7 +13,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 part 'web_socket.g.dart';
 
 // const String wsUrl = 'wss://shogoshima.duckdns.org/ws';
-const String wsUrl = 'ws://10.0.2.2:8080/ws';
+const String wsUrl = 'ws://192.168.15.6:8080/ws';
 
 @riverpod
 class WebSocket extends _$WebSocket {
@@ -22,6 +22,7 @@ class WebSocket extends _$WebSocket {
   String? _idToken;
   Timer? _reconnectTimer;
   final Duration _reconnectDelay = const Duration(seconds: 1);
+  bool _disposed = false;
 
   /// The build method is used for initialization.
   /// Here we await for the Google authentication and then create the connection.
@@ -33,6 +34,7 @@ class WebSocket extends _$WebSocket {
       _channel = null;
       _userId = null;
       _idToken = null;
+      _disposed = true;
     });
 
     // Watch the authentication provider.
@@ -51,6 +53,8 @@ class WebSocket extends _$WebSocket {
 
   /// Connects to the WebSocket endpoint using the authenticated user’s ID.
   Future<void> _connect() async {
+    if (_disposed) return;
+
     try {
       _channel = WebSocketChannel.connect(Uri.parse('$wsUrl/$_userId'));
 
@@ -68,7 +72,7 @@ class WebSocket extends _$WebSocket {
         },
         onDone: () {
           debugPrint('WebSocket closed');
-          // _scheduleReconnect();
+          _scheduleReconnect();
         },
       );
     } catch (e, stackTrace) {
@@ -80,6 +84,8 @@ class WebSocket extends _$WebSocket {
 
   /// Schedules a reconnection after a set delay.
   void _scheduleReconnect() {
+    if (_disposed) return;
+
     _channel?.sink.close();
     state = const AsyncData(null);
     if (_reconnectTimer?.isActive ?? false) return;
@@ -161,7 +167,7 @@ class WebSocket extends _$WebSocket {
       _channel!.sink.add(
         jsonEncode({'type': 'authentication', 'data': authentication}),
       );
-      debugPrint('Sent action');
+      debugPrint('Sent authentication');
     } else {
       debugPrint('Connection not established. Authentication not sent.');
     }

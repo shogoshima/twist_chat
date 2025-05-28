@@ -65,10 +65,8 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder:
-                                      (context) => ChatPage(
-                                        chatId: chatSummary.chatId,
-                                        isGroup: chatSummary.isGroup,
-                                      ),
+                                      (context) =>
+                                          ChatPage(chatId: chatSummary.chatId),
                                 ),
                               );
                             },

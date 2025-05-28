@@ -15,8 +15,7 @@ import 'package:uuid/uuid.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   final String chatId;
-  final bool isGroup;
-  const ChatPage({super.key, required this.chatId, required this.isGroup});
+  const ChatPage({super.key, required this.chatId});
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();
@@ -99,7 +98,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       )
                       : CircleAvatar(backgroundColor: Colors.black),
                   const SizedBox(width: 8),
-                  widget.isGroup
+                  summary.isGroup
                       ? Expanded(
                         child: switch (chatDetails) {
                           AsyncData(:final value) => FadingTextButton(
@@ -152,8 +151,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             messages: _formatMessages(value),
             onSendPressed: _handleSendPressed,
             user: types.User(id: user.uid),
-            showUserAvatars: widget.isGroup,
-            showUserNames: widget.isGroup,
+            showUserAvatars: value.participants.length > 2,
+            showUserNames: value.participants.length > 2,
             onEndReached: () async {
               await ref
                   .read(singleChatProvider(widget.chatId).notifier)

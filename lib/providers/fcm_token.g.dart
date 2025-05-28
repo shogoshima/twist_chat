@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'profile.dart';
+part of 'fcm_token.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileHash() => r'951d257f6dedeeed7409cf1fb70cbd5590c80d66';
+String _$fcmTokenHash() => r'f222dcfc5425788dae55a5956a48859b1d0ec055';
 
-/// See also [profile].
-@ProviderFor(profile)
-final profileProvider = AutoDisposeFutureProvider<Profile?>.internal(
-  profile,
-  name: r'profileProvider',
+/// See also [fcmToken].
+@ProviderFor(fcmToken)
+final fcmTokenProvider = AutoDisposeFutureProvider<void>.internal(
+  fcmToken,
+  name: r'fcmTokenProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$profileHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$fcmTokenHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ProfileRef = AutoDisposeFutureProviderRef<Profile?>;
+typedef FcmTokenRef = AutoDisposeFutureProviderRef<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

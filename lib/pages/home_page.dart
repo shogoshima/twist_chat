@@ -1,8 +1,12 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twist_chat/common/notification_plugin.dart';
 import 'package:twist_chat/pages/account_page.dart';
 import 'package:twist_chat/pages/chats_page.dart';
 import 'package:twist_chat/providers/active_filter.dart';
+import 'package:twist_chat/providers/fcm_token.dart';
 import 'package:twist_chat/providers/filter.dart';
 import 'package:twist_chat/providers/global_chat.dart';
 import 'package:twist_chat/providers/web_socket.dart';
@@ -21,6 +25,44 @@ class _HomePageState extends ConsumerState<HomePage> {
   final List<String> _titles = ['Chats', 'Settings'];
 
   bool wideScreen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      if (message.data.isEmpty) return;
+      _handleIncomingMessage(message);
+    });
+  }
+
+  Future<void> _handleIncomingMessage(RemoteMessage message) async {
+    // 1) Log safely (throttled)…
+    debugPrint('FCM payload: ${message.data}');
+
+    // 2) Persist to disk or DB via compute(), isolate or a dedicated service…
+    // await compute(_savePayload, message.data);
+
+    // 3) Show a notification (still on the main isolate, but now it's the *only* work here)
+    final android = AndroidNotificationDetails(
+      'default',
+      'Default',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    await flutterLocalNotificationsPlugin.show(
+      /*id*/ 0,
+      '${message.data['sender_name']} says:',
+      message.data['text'],
+      NotificationDetails(android: android),
+      payload: message.data['chat_id'],
+    );
+  }
+
+  // Runs in a background isolate:
+  // Map<String, dynamic> _savePayload(Map<String, dynamic> data) {
+  //   // e.g. write to SQLite, SharedPreferences, etc.
+  //   return data;
+  // }
 
   @override
   void didChangeDependencies() {
@@ -59,6 +101,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     ref.watch(globalChatProvider);
     ref.watch(filterProvider);
     ref.watch(activeFilterProvider);
+    ref.watch(fcmTokenProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,

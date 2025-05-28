@@ -2,7 +2,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/providers/api_client.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:twist_chat/providers/profile.dart';
 
 part 'auth.g.dart';
 
@@ -13,7 +12,6 @@ class Auth extends _$Auth {
 
   @override
   Future<User?> build() async {
-    ref.watch(profileProvider);
     return FirebaseAuth.instance.currentUser;
   }
 
@@ -31,12 +29,13 @@ class Auth extends _$Auth {
 
     await _auth.signInWithCredential(credential);
 
-    ref.watch(profileProvider);
-
     state = AsyncData(_auth.currentUser);
   }
 
   Future<void> logout() async {
+    final apiClient = ref.read(apiClientProvider);
+    await apiClient.delete(ApiRoutes.fcm);
+
     await _googleSignIn.signOut();
     await _auth.signOut();
 
@@ -45,6 +44,7 @@ class Auth extends _$Auth {
 
   Future<void> delete() async {
     final apiClient = ref.read(apiClientProvider);
+    await apiClient.delete(ApiRoutes.fcm);
     await apiClient.delete(ApiRoutes.me);
 
     await _googleSignIn.signOut();

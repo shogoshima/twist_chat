@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 part 'api_client.g.dart';
 
 // const String baseUrl = 'https://shogoshima.duckdns.org';
-const String baseUrl = 'http://10.0.2.2:8080';
+const String baseUrl = 'http://192.168.15.6:8080';
 
 class ApiRoutes {
   static String chats = '/chats';
@@ -18,14 +18,14 @@ class ApiRoutes {
   static String group = '/chats/group';
 
   static String login = '/login';
-  
+
   static String users = '/users';
   static String me = '/users/me';
+  static String fcm = '/users/fcm';
 }
 
 @Riverpod(keepAlive: true)
 class ApiClient extends _$ApiClient {
-
   @override
   ApiClient build() {
     return this;
