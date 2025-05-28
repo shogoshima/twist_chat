@@ -22,7 +22,6 @@ Future<void> fcmToken(Ref ref) async {
       settings.authorizationStatus == AuthorizationStatus.provisional) {
     // 2. Get token
     final token = await FirebaseMessaging.instance.getToken();
-    print('FCM Token: $token');
 
     // 3. Send to backend if not null
     if (token != null) {
@@ -37,7 +36,5 @@ Future<void> fcmToken(Ref ref) async {
         'fcm_token': newToken,
       });
     });
-  } else {
-    print('Notification permission denied');
   }
 }

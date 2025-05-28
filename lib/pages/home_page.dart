@@ -50,7 +50,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       priority: Priority.high,
     );
     await flutterLocalNotificationsPlugin.show(
-      /*id*/ 0,
+      message.data['message_id'],
       '${message.data['sender_name']} says:',
       message.data['text'],
       NotificationDetails(android: android),
