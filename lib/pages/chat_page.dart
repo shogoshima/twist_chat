@@ -6,6 +6,7 @@ import 'package:twist_chat/models/chat_details.dart' as models;
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/active_filter.dart';
 import 'package:twist_chat/providers/global_chat.dart';
+import 'package:twist_chat/providers/open_chat.dart';
 import 'package:twist_chat/providers/single_chat.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:twist_chat/providers/web_socket.dart';
@@ -72,6 +73,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   AppBar _buildAppBar() {
     return AppBar(
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          ref.read(openChatProvider.notifier).close();
+          Navigator.of(context).pop(); // Optional: go back
+        },
+      ),
       title: Consumer(
         builder: (context, ref, child) {
           final AsyncValue<List<ChatSummary>> chatSummaries = ref.watch(

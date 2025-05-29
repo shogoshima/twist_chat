@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/pages/chat_page.dart';
 import 'package:twist_chat/providers/global_chat.dart';
+import 'package:twist_chat/providers/notification.dart';
+import 'package:twist_chat/providers/open_chat.dart';
 import 'package:twist_chat/widgets/show_create_chat_modal.dart';
 import 'package:twist_chat/widgets/widgets.dart';
 
@@ -27,6 +29,7 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
     final AsyncValue<List<ChatSummary>> chatSummaries = ref.watch(
       globalChatProvider,
     );
+    final notificationSet = ref.watch(notificationProvider);
     return Scaffold(
       body: Column(
         children: [
@@ -61,6 +64,15 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
                                     )
                                     : const Text('No messages'),
                             onTap: () async {
+                              ref
+                                  .read(openChatProvider.notifier)
+                                  .open(chatSummary.chatId);
+
+                              await ref
+                                  .read(notificationProvider.notifier)
+                                  .openChat(chatSummary.chatId);
+
+                              if (!context.mounted) return;
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -70,6 +82,20 @@ class _ChatsPageState extends ConsumerState<ChatsPage> {
                                 ),
                               );
                             },
+                            trailing: notificationSet.when(
+                              data: (set) {
+                                if (set.contains(chatSummary.chatId)) {
+                                  return Icon(
+                                    Icons.circle,
+                                    color: Colors.deepPurple,
+                                    size: 12,
+                                  );
+                                }
+                                return SizedBox();
+                              },
+                              loading: () => SizedBox(),
+                              error: (error, stackTrace) => SizedBox(),
+                            ),
                           );
                         },
                       ),
