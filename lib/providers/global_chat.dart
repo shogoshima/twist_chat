@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/api_client.dart';
+import 'package:twist_chat/providers/single_chat.dart';
 import 'package:twist_chat/providers/web_socket.dart';
 
 part 'global_chat.g.dart';
@@ -17,9 +18,16 @@ class GlobalChat extends _$GlobalChat {
       return [];
     }
 
-    return (json['chats'] as List)
-        .map((chat) => ChatSummary.fromJson(chat))
-        .toList();
+    List<ChatSummary> chatSummaries =
+        (json['chats'] as List)
+            .map((chat) => ChatSummary.fromJson(chat))
+            .toList();
+
+    for (final chat in chatSummaries) {
+      ref.invalidate(singleChatProvider(chat.chatId));
+    }
+
+    return chatSummaries;
   }
 
   ChatSummary? getById(String chatId) {

@@ -17,6 +17,11 @@ class SingleChat extends _$SingleChat {
   /// Build is called with the chatId as parameter.
   @override
   Future<ChatDetails> build(String chatId) async {
+    ref.onDispose(() {
+      _page = 1;
+      _endReached = false;
+    });
+
     _chatId = chatId;
 
     final apiClient = ref.watch(apiClientProvider);
@@ -51,11 +56,11 @@ class SingleChat extends _$SingleChat {
     state = AsyncValue.data(updatedChat);
   }
 
-  Future<void> loadMore() async {
-    if (_endReached) return;
+  Future<List<Message>> loadMore() async {
+    if (_endReached) return [];
 
     final currentState = state.value;
-    if (currentState == null) return;
+    if (currentState == null) return [];
 
     _page += 1;
     final apiClient = ref.watch(apiClientProvider);
@@ -75,13 +80,19 @@ class SingleChat extends _$SingleChat {
       _endReached = true;
     }
 
-    final updatedMessages = [
-      ...currentState.messages,
-      ...moreChatDetails.messages,
-    ];
+    //––– Deduplicate: only keep messages whose IDs we don’t already have
+    final existingIds = currentState.messages.map((m) => m.id).toSet();
+    final newMessages =
+        moreChatDetails.messages
+            .where((m) => !existingIds.contains(m.id))
+            .toList();
+
+    final updatedMessages = [...currentState.messages, ...newMessages];
     final updatedChat = currentState.copyWith(messages: updatedMessages);
 
     state = AsyncValue.data(updatedChat);
+
+    return newMessages.reversed.toList();
   }
 
   Future<void> addParticipants(List<String> participantsUsernames) async {

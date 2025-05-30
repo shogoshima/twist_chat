@@ -21,7 +21,7 @@ class WebSocket extends _$WebSocket {
   String? _userId;
   String? _idToken;
   Timer? _reconnectTimer;
-  final Duration _reconnectDelay = const Duration(seconds: 1);
+  final Duration _reconnectDelay = const Duration(milliseconds: 500);
   bool _disposed = false;
 
   /// The build method is used for initialization.
@@ -68,10 +68,12 @@ class WebSocket extends _$WebSocket {
         _handleIncomingMessage,
         onError: (error) {
           debugPrint('WebSocket error: $error');
+          _channel = null;
           _scheduleReconnect();
         },
         onDone: () {
           debugPrint('WebSocket closed');
+          _channel = null;
           _scheduleReconnect();
         },
       );

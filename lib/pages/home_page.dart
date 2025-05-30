@@ -72,12 +72,12 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(globalChatProvider);
+    ref.watch(openChatProvider);
     ref.watch(filterProvider);
     ref.watch(activeFilterProvider);
     ref.watch(fcmTokenProvider);
     ref.watch(notificationProvider);
-    ref.watch(openChatProvider);
+    ref.watch(globalChatProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
