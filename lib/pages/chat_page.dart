@@ -356,7 +356,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                               .emoji,
                           style: TextStyle(fontSize: 20),
                         ),
+                inputBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
                 maxLength: 200,
+                maxLines: 1,
               ),
         ),
         onMessageSend: _handleOnMessageSend,
