@@ -312,13 +312,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           },
           chatMessageBuilder:
               (
-                context,
+                p0,
                 message,
                 index,
                 animation,
                 child, {
                 groupStatus,
                 isRemoved,
+                required isSentByMe,
               }) => ChatMessage(
                 message: message,
                 index: index,
@@ -336,13 +337,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
                 topWidget: buildTopWidget(groupStatus, message, user.uid),
                 child: child,
-              ),
-          textMessageBuilder:
-              (context, message, index) => SimpleTextMessage(
-                message: message,
-                index: index,
-                showTime: false,
-                showStatus: false,
               ),
           composerBuilder:
               (context) => Composer(
