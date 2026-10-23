@@ -7,6 +7,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 part 'auth.g.dart';
 
+/// Emits the signed-in [User] (or null) whenever the Firebase session changes.
+/// Session-scoped providers (web socket, chat list) watch this to rebuild on
+/// login/logout instead of relying on a widget to dispose them.
+@Riverpod(keepAlive: true)
+Stream<User?> authState(Ref ref) => FirebaseAuth.instance.authStateChanges();
+
 @riverpod
 class Auth extends _$Auth {
   final FirebaseAuth _auth = FirebaseAuth.instance;

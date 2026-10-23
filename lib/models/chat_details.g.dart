@@ -8,14 +8,12 @@ part of 'chat_details.dart';
 
 _ChatDetails _$ChatDetailsFromJson(Map<String, dynamic> json) => _ChatDetails(
   chatId: json['chat_id'] as String,
-  messages:
-      (json['messages'] as List<dynamic>)
-          .map((e) => Message.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  participants:
-      (json['participants'] as List<dynamic>)
-          .map((e) => Profile.fromJson(e as Map<String, dynamic>))
-          .toList(),
+  messages: (json['messages'] as List<dynamic>)
+      .map((e) => Message.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  participants: (json['participants'] as List<dynamic>)
+      .map((e) => Profile.fromJson(e as Map<String, dynamic>))
+      .toList(),
   page: (json['page'] as num).toInt(),
   pageSize: (json['page_size'] as num).toInt(),
 );

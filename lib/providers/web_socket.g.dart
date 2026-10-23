@@ -8,19 +8,25 @@ part of 'web_socket.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// App-wide connection: lives for the whole session and is rebuilt (closing the
+/// previous channel) whenever the signed-in user changes.
 
 @ProviderFor(WebSocket)
 const webSocketProvider = WebSocketProvider._();
 
+/// App-wide connection: lives for the whole session and is rebuilt (closing the
+/// previous channel) whenever the signed-in user changes.
 final class WebSocketProvider
     extends $AsyncNotifierProvider<WebSocket, WebSocketChannel?> {
+  /// App-wide connection: lives for the whole session and is rebuilt (closing the
+  /// previous channel) whenever the signed-in user changes.
   const WebSocketProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'webSocketProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -33,7 +39,10 @@ final class WebSocketProvider
   WebSocket create() => WebSocket();
 }
 
-String _$webSocketHash() => r'ecabedd5557c378fe7edda0d524f368da1e3929a';
+String _$webSocketHash() => r'4f5979d86b20973c5de3e4cd918995e918cc8575';
+
+/// App-wide connection: lives for the whole session and is rebuilt (closing the
+/// previous channel) whenever the signed-in user changes.
 
 abstract class _$WebSocket extends $AsyncNotifier<WebSocketChannel?> {
   FutureOr<WebSocketChannel?> build();

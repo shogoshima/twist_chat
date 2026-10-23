@@ -11,10 +11,9 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   displayName: json['display_name'] as String,
   username: json['username'] as String,
   photoUrl: json['photo_url'] as String,
-  lastSeen:
-      json['last_seen'] == null
-          ? null
-          : DateTime.parse(json['last_seen'] as String),
+  lastSeen: json['last_seen'] == null
+      ? null
+      : DateTime.parse(json['last_seen'] as String),
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{

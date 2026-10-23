@@ -8,19 +8,25 @@ part of 'global_chat.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Session-wide chat list: kept alive for the whole session and rebuilt
+/// whenever the signed-in user changes.
 
 @ProviderFor(GlobalChat)
 const globalChatProvider = GlobalChatProvider._();
 
+/// Session-wide chat list: kept alive for the whole session and rebuilt
+/// whenever the signed-in user changes.
 final class GlobalChatProvider
     extends $AsyncNotifierProvider<GlobalChat, List<ChatSummary>> {
+  /// Session-wide chat list: kept alive for the whole session and rebuilt
+  /// whenever the signed-in user changes.
   const GlobalChatProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'globalChatProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -33,7 +39,10 @@ final class GlobalChatProvider
   GlobalChat create() => GlobalChat();
 }
 
-String _$globalChatHash() => r'1f2c900638c61558a88f63ee36203443a5239ea5';
+String _$globalChatHash() => r'3b775ee1fd0a517c214e8b3dd7b5936f972a804a';
+
+/// Session-wide chat list: kept alive for the whole session and rebuilt
+/// whenever the signed-in user changes.
 
 abstract class _$GlobalChat extends $AsyncNotifier<List<ChatSummary>> {
   FutureOr<List<ChatSummary>> build();

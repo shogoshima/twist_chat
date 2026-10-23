@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/models/web_socket_authentication.dart';
+import 'package:twist_chat/providers/auth.dart';
 import 'package:twist_chat/providers/global_chat.dart';
 import 'package:twist_chat/providers/single_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -15,9 +16,12 @@ part 'web_socket.g.dart';
 const String wsUrl = 'wss://shogoshima.duckdns.org/ws';
 // const String wsUrl = 'ws://192.168.15.6:8080/ws';
 
-@riverpod
+/// App-wide connection: lives for the whole session and is rebuilt (closing the
+/// previous channel) whenever the signed-in user changes.
+@Riverpod(keepAlive: true)
 class WebSocket extends _$WebSocket {
   WebSocketChannel? _channel;
+  User? _user;
   String? _userId;
   String? _idToken;
   Timer? _reconnectTimer;
@@ -32,19 +36,18 @@ class WebSocket extends _$WebSocket {
       _reconnectTimer?.cancel();
       _channel?.sink.close();
       _channel = null;
+      _user = null;
       _userId = null;
       _idToken = null;
       _disposed = true;
     });
 
-    // Watch the authentication provider.
-    final User? user = FirebaseAuth.instance.currentUser;
+    // Watch the authentication state so we reconnect on login and close on logout.
+    final User? user = await ref.watch(authStateProvider.future);
     if (user == null) return null;
 
-    _idToken = await user.getIdToken();
+    _user = user;
     _userId = user.uid;
-
-    if (_idToken == null || _userId == null) return null;
 
     await _connect();
 
@@ -55,7 +58,19 @@ class WebSocket extends _$WebSocket {
   Future<void> _connect() async {
     if (_disposed) return;
 
+    final user = _user;
+    if (user == null) return;
+
     try {
+      // Fetch the token on every (re)connection: Firebase ID tokens expire
+      // after an hour, so a cached one would be rejected on a late reconnect.
+      // getIdToken() returns the cached token while valid and refreshes it
+      // transparently once expired.
+      _idToken = await user.getIdToken();
+      if (_idToken == null) {
+        throw StateError('Firebase did not return an ID token.');
+      }
+
       _channel = WebSocketChannel.connect(Uri.parse('$wsUrl/$_userId'));
 
       sendAuthentication();

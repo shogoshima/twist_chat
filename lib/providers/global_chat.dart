@@ -1,15 +1,25 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/api_client.dart';
+import 'package:twist_chat/providers/auth.dart';
 import 'package:twist_chat/providers/single_chat.dart';
 import 'package:twist_chat/providers/web_socket.dart';
 
 part 'global_chat.g.dart';
 
-@riverpod
+/// Session-wide chat list: kept alive for the whole session and rebuilt
+/// whenever the signed-in user changes.
+@Riverpod(keepAlive: true)
 class GlobalChat extends _$GlobalChat {
   @override
   Future<List<ChatSummary>> build() async {
+    final user = await ref.watch(authStateProvider.future);
+    if (user == null) {
+      // Signed out: drop every cached chat so nothing leaks into the next session.
+      ref.invalidate(singleChatProvider);
+      return [];
+    }
+
     final apiClient = ref.watch(apiClientProvider);
 
     // Fetch all the chats (metadata)
