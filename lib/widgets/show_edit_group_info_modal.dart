@@ -113,7 +113,7 @@ Widget _buildSaveButton(
       return SizeTransition(
         sizeFactor: animation,
         axis: Axis.vertical,
-        axisAlignment: -1.0,
+        alignment: AlignmentDirectional.topStart,
         child: child,
       );
     },

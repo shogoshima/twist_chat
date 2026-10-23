@@ -160,7 +160,7 @@ Widget _buildGroupNameInput(
       return SizeTransition(
         sizeFactor: animation,
         axis: Axis.vertical,
-        axisAlignment: -1.0,
+        alignment: AlignmentDirectional.topStart,
         child: child,
       );
     },
@@ -207,7 +207,7 @@ Widget _buildCreateChatButton(
       return SizeTransition(
         sizeFactor: animation,
         axis: Axis.vertical,
-        axisAlignment: -1.0,
+        alignment: AlignmentDirectional.topStart,
         child: child,
       );
     },

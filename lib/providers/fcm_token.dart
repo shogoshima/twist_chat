@@ -19,14 +19,21 @@ Future<void> fcmToken(Ref ref) async {
 
   if (settings.authorizationStatus == AuthorizationStatus.authorized ||
       settings.authorizationStatus == AuthorizationStatus.provisional) {
-    final messaging = FirebaseMessaging.instance;
-    messaging.onRegistered.listen((token) async {
+    // 2. Get token
+    final token = await FirebaseMessaging.instance.getToken();
+
+    // 3. Send to backend if not null
+    if (token != null) {
       await ref.read(apiClientProvider).put(ApiRoutes.fcm, {
         'fcm_token': token,
       });
-    });
+    }
 
-    // Registering emits the Firebase Installation ID used for direct sends.
-    await messaging.register();
+    // 4. Handle token refresh
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      await ref.read(apiClientProvider).put(ApiRoutes.fcm, {
+        'fcm_token': newToken,
+      });
+    });
   }
 }
