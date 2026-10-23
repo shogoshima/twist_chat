@@ -6,22 +6,51 @@ part of 'web_socket.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(WebSocket)
+const webSocketProvider = WebSocketProvider._();
+
+final class WebSocketProvider
+    extends $AsyncNotifierProvider<WebSocket, WebSocketChannel?> {
+  const WebSocketProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'webSocketProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$webSocketHash();
+
+  @$internal
+  @override
+  WebSocket create() => WebSocket();
+}
+
 String _$webSocketHash() => r'ecabedd5557c378fe7edda0d524f368da1e3929a';
 
-/// See also [WebSocket].
-@ProviderFor(WebSocket)
-final webSocketProvider =
-    AutoDisposeAsyncNotifierProvider<WebSocket, WebSocketChannel?>.internal(
-      WebSocket.new,
-      name: r'webSocketProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$webSocketHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$WebSocket = AutoDisposeAsyncNotifier<WebSocketChannel?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$WebSocket extends $AsyncNotifier<WebSocketChannel?> {
+  FutureOr<WebSocketChannel?> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref =
+        this.ref as $Ref<AsyncValue<WebSocketChannel?>, WebSocketChannel?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<WebSocketChannel?>, WebSocketChannel?>,
+              AsyncValue<WebSocketChannel?>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

@@ -6,20 +6,57 @@ part of 'open_chat.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(OpenChat)
+const openChatProvider = OpenChatProvider._();
+
+final class OpenChatProvider extends $NotifierProvider<OpenChat, String?> {
+  const OpenChatProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'openChatProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$openChatHash();
+
+  @$internal
+  @override
+  OpenChat create() => OpenChat();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
 String _$openChatHash() => r'348a57a5736847acacbcc2c0940575a33fa5f3ec';
 
-/// See also [OpenChat].
-@ProviderFor(OpenChat)
-final openChatProvider =
-    AutoDisposeNotifierProvider<OpenChat, String?>.internal(
-      OpenChat.new,
-      name: r'openChatProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product') ? null : _$openChatHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$OpenChat = AutoDisposeNotifier<String?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$OpenChat extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

@@ -58,10 +58,10 @@ class Notification extends _$Notification {
       priority: Priority.high,
     );
     await flutterLocalNotificationsPlugin.show(
-      0,
-      '${message.data['sender_name']} says:',
-      message.data['text'],
-      NotificationDetails(android: android),
+      id: 0,
+      title: '${message.data['sender_name']} says:',
+      body: message.data['text'],
+      notificationDetails: NotificationDetails(android: android),
       payload: message.data['chat_id'],
     );
   }

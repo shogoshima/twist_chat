@@ -10,7 +10,7 @@ part 'auth.g.dart';
 @riverpod
 class Auth extends _$Auth {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   @override
   Future<User?> build() async {
@@ -20,16 +20,21 @@ class Auth extends _$Auth {
   Future<void> login() async {
     final apiClient = ref.read(apiClientProvider);
 
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return;
+    if (!_googleSignIn.supportsAuthenticate()) {
+      throw UnsupportedError(
+        'Google sign-in is not supported on this platform.',
+      );
+    }
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+    final idToken = googleAuth.idToken;
+    if (idToken == null) {
+      throw StateError('Google sign-in did not return an ID token.');
+    }
+
+    final credential = GoogleAuthProvider.credential(idToken: idToken);
 
     await _auth.signInWithCredential(credential);
 

@@ -6,168 +6,104 @@ part of 'single_chat.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$singleChatHash() => r'3209318a009cd22f7a0e71f8d34df67bf88cc372';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$SingleChat extends BuildlessAsyncNotifier<ChatDetails> {
-  late final String chatId;
-
-  FutureOr<ChatDetails> build(String chatId);
-}
-
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 /// A family provider for a granular chat state notifier, keyed by chatId.
-///
-/// Copied from [SingleChat].
+
 @ProviderFor(SingleChat)
-const singleChatProvider = SingleChatFamily();
+const singleChatProvider = SingleChatFamily._();
 
 /// A family provider for a granular chat state notifier, keyed by chatId.
-///
-/// Copied from [SingleChat].
-class SingleChatFamily extends Family<AsyncValue<ChatDetails>> {
+final class SingleChatProvider
+    extends $AsyncNotifierProvider<SingleChat, ChatDetails> {
   /// A family provider for a granular chat state notifier, keyed by chatId.
-  ///
-  /// Copied from [SingleChat].
-  const SingleChatFamily();
+  const SingleChatProvider._({
+    required SingleChatFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'singleChatProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// A family provider for a granular chat state notifier, keyed by chatId.
-  ///
-  /// Copied from [SingleChat].
-  SingleChatProvider call(String chatId) {
-    return SingleChatProvider(chatId);
+  @override
+  String debugGetCreateSourceHash() => _$singleChatHash();
+
+  @override
+  String toString() {
+    return r'singleChatProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  SingleChatProvider getProviderOverride(
-    covariant SingleChatProvider provider,
-  ) {
-    return call(provider.chatId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'singleChatProvider';
-}
-
-/// A family provider for a granular chat state notifier, keyed by chatId.
-///
-/// Copied from [SingleChat].
-class SingleChatProvider
-    extends AsyncNotifierProviderImpl<SingleChat, ChatDetails> {
-  /// A family provider for a granular chat state notifier, keyed by chatId.
-  ///
-  /// Copied from [SingleChat].
-  SingleChatProvider(String chatId)
-    : this._internal(
-        () => SingleChat()..chatId = chatId,
-        from: singleChatProvider,
-        name: r'singleChatProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$singleChatHash,
-        dependencies: SingleChatFamily._dependencies,
-        allTransitiveDependencies: SingleChatFamily._allTransitiveDependencies,
-        chatId: chatId,
-      );
-
-  SingleChatProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.chatId,
-  }) : super.internal();
-
-  final String chatId;
-
-  @override
-  FutureOr<ChatDetails> runNotifierBuild(covariant SingleChat notifier) {
-    return notifier.build(chatId);
-  }
-
-  @override
-  Override overrideWith(SingleChat Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: SingleChatProvider._internal(
-        () => create()..chatId = chatId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        chatId: chatId,
-      ),
-    );
-  }
-
-  @override
-  AsyncNotifierProviderElement<SingleChat, ChatDetails> createElement() {
-    return _SingleChatProviderElement(this);
-  }
+  SingleChat create() => SingleChat();
 
   @override
   bool operator ==(Object other) {
-    return other is SingleChatProvider && other.chatId == chatId;
+    return other is SingleChatProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, chatId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SingleChatRef on AsyncNotifierProviderRef<ChatDetails> {
-  /// The parameter `chatId` of this provider.
-  String get chatId;
-}
+String _$singleChatHash() => r'3209318a009cd22f7a0e71f8d34df67bf88cc372';
 
-class _SingleChatProviderElement
-    extends AsyncNotifierProviderElement<SingleChat, ChatDetails>
-    with SingleChatRef {
-  _SingleChatProviderElement(super.provider);
+/// A family provider for a granular chat state notifier, keyed by chatId.
+
+final class SingleChatFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          SingleChat,
+          AsyncValue<ChatDetails>,
+          ChatDetails,
+          FutureOr<ChatDetails>,
+          String
+        > {
+  const SingleChatFamily._()
+    : super(
+        retry: null,
+        name: r'singleChatProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  /// A family provider for a granular chat state notifier, keyed by chatId.
+
+  SingleChatProvider call(String chatId) =>
+      SingleChatProvider._(argument: chatId, from: this);
 
   @override
-  String get chatId => (origin as SingleChatProvider).chatId;
+  String toString() => r'singleChatProvider';
 }
 
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// A family provider for a granular chat state notifier, keyed by chatId.
+
+abstract class _$SingleChat extends $AsyncNotifier<ChatDetails> {
+  late final _$args = ref.$arg as String;
+  String get chatId => _$args;
+
+  FutureOr<ChatDetails> build(String chatId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(_$args);
+    final ref = this.ref as $Ref<AsyncValue<ChatDetails>, ChatDetails>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<ChatDetails>, ChatDetails>,
+              AsyncValue<ChatDetails>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

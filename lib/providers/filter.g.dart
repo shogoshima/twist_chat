@@ -6,21 +6,44 @@ part of 'filter.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$filterHash() => r'9508d9bd65e273ffed0bb0f27ed98757fd79eae0';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [filter].
 @ProviderFor(filter)
-final filterProvider = AutoDisposeFutureProvider<List<Filter>>.internal(
-  filter,
-  name: r'filterProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$filterHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const filterProvider = FilterProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FilterRef = AutoDisposeFutureProviderRef<List<Filter>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class FilterProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Filter>>,
+          List<Filter>,
+          FutureOr<List<Filter>>
+        >
+    with $FutureModifier<List<Filter>>, $FutureProvider<List<Filter>> {
+  const FilterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'filterProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$filterHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Filter>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Filter>> create(Ref ref) {
+    return filter(ref);
+  }
+}
+
+String _$filterHash() => r'9508d9bd65e273ffed0bb0f27ed98757fd79eae0';

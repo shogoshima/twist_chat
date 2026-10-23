@@ -155,7 +155,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Widget buildTrailingWidget(
     MessageGroupStatus? groupStatus,
     Message message,
-    String userId,
+    bool isSentByMe,
   ) {
     bool? isFirst = groupStatus?.isFirst;
     bool? isLast = groupStatus?.isLast;
@@ -170,7 +170,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       }
     }
 
-    if (message.authorId != userId) {
+    if (!isSentByMe) {
       return Padding(
         padding: EdgeInsets.only(left: 4),
         child: Text(
@@ -197,7 +197,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Widget buildLeadingWidget(
     MessageGroupStatus? groupStatus,
     Message message,
-    String userId,
+    bool isSentByMe,
   ) {
     bool? isFirst = groupStatus?.isFirst;
     bool? isLast = groupStatus?.isLast;
@@ -212,7 +212,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       }
     }
 
-    if (message.authorId == userId) {
+    if (isSentByMe) {
       return Padding(
         padding: EdgeInsets.only(right: 4),
         child: Text(
@@ -236,11 +236,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     return const SizedBox();
   }
 
-  Widget buildTopWidget(
-    MessageGroupStatus? groupStatus,
-    Message message,
-    String userId,
-  ) {
+  Widget buildTopWidget(MessageGroupStatus? groupStatus, Message message) {
     bool? isFirst = groupStatus?.isFirst;
     bool? isLast = groupStatus?.isLast;
     bool? isMiddle = groupStatus?.isMiddle;
@@ -312,7 +308,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           },
           chatMessageBuilder:
               (
-                p0,
+                context,
                 message,
                 index,
                 animation,
@@ -328,16 +324,24 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 leadingWidget: buildLeadingWidget(
                   groupStatus,
                   message,
-                  user.uid,
+                  isSentByMe,
                 ),
                 trailingWidget: buildTrailingWidget(
                   groupStatus,
                   message,
-                  user.uid,
+                  isSentByMe,
                 ),
-                topWidget: buildTopWidget(groupStatus, message, user.uid),
+                topWidget: buildTopWidget(groupStatus, message),
                 child: child,
               ),
+          textMessageBuilder:
+              (context, message, index, {groupStatus, required isSentByMe}) =>
+                  SimpleTextMessage(
+                    message: message,
+                    index: index,
+                    showTime: false,
+                    showStatus: false,
+                  ),
           composerBuilder:
               (context) => Composer(
                 attachmentIcon:
