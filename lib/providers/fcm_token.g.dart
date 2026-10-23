@@ -40,4 +40,4 @@ final class FcmTokenProvider
   }
 }
 
-String _$fcmTokenHash() => r'26c0402b722228a3d70c6a3121856823b61723e6';
+String _$fcmTokenHash() => r'e887d6116771dad6bea1eb02a0f51df78214b22f';

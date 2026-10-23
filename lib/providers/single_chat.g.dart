@@ -53,7 +53,7 @@ final class SingleChatProvider
   }
 }
 
-String _$singleChatHash() => r'3209318a009cd22f7a0e71f8d34df67bf88cc372';
+String _$singleChatHash() => r'7982cfd0d37c8c00e46961635a46abc387b142ad';
 
 /// A family provider for a granular chat state notifier, keyed by chatId.
 

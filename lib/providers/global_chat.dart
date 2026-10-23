@@ -28,28 +28,15 @@ class GlobalChat extends _$GlobalChat {
       return [];
     }
 
-    List<ChatSummary> chatSummaries =
-        (json['chats'] as List)
-            .map((chat) => ChatSummary.fromJson(chat))
-            .toList();
-
-    for (final chat in chatSummaries) {
-      ref.invalidate(singleChatProvider(chat.chatId));
-    }
-
-    return chatSummaries;
-  }
-
-  ChatSummary? getById(String chatId) {
-    final currentState = state.value;
-
-    if (currentState == null) return null;
-
-    return currentState.firstWhere((e) => e.chatId == chatId);
+    // Cached chat details are left alone: the socket keeps them current, and
+    // the server asks for `refresh_details` when one actually changed.
+    return (json['chats'] as List)
+        .map((chat) => ChatSummary.fromJson(chat))
+        .toList();
   }
 
   Future<void> fetchNewChat(String chatId) async {
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     // Fetch all the chats (metadata)
     final json = await apiClient.get('${ApiRoutes.summaries}/$chatId');
@@ -63,7 +50,7 @@ class GlobalChat extends _$GlobalChat {
   }
 
   Future<void> createNewSingleChat(String username) async {
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     // post and receive the new chat (metadata)
     final json = await apiClient.post(ApiRoutes.dm, {'username': username});
@@ -83,7 +70,7 @@ class GlobalChat extends _$GlobalChat {
   }
 
   Future<void> createNewGroupChat(List<String> usernames, String name) async {
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     final json = await apiClient.post(ApiRoutes.group, {
       'usernames': usernames,
@@ -123,7 +110,7 @@ class GlobalChat extends _$GlobalChat {
   }
 
   Future<void> updateGroupChatInfo(String chatId, String chatName) async {
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     await apiClient.put('${ApiRoutes.group}/$chatId', {'name': chatName});
 
@@ -136,14 +123,8 @@ class GlobalChat extends _$GlobalChat {
 
     if (currentState == null) return;
 
-    final updated = List<ChatSummary>.from(currentState);
-
-    // Find the chat and bring it to the front
-    final index = updated.indexWhere((chat) => chat.chatId == chatId);
-    if (index != -1) {
-      updated.removeAt(index);
-    }
-
-    state = AsyncValue.data(updated);
+    state = AsyncValue.data(
+      currentState.where((chat) => chat.chatId != chatId).toList(),
+    );
   }
 }

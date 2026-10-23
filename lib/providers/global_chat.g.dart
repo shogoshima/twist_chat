@@ -39,7 +39,7 @@ final class GlobalChatProvider
   GlobalChat create() => GlobalChat();
 }
 
-String _$globalChatHash() => r'3b775ee1fd0a517c214e8b3dd7b5936f972a804a';
+String _$globalChatHash() => r'9623fd2044ae4fef919b717730324822b25c3a90';
 
 /// Session-wide chat list: kept alive for the whole session and rebuilt
 /// whenever the signed-in user changes.

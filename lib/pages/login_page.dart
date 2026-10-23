@@ -19,7 +19,7 @@ class LoginPage extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Text(
               'Just an ordinary chat app...\nbut with a twist',
               style: TextStyle(
@@ -29,8 +29,8 @@ class LoginPage extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 96),
-            SignInButton(),
+            const SizedBox(height: 96),
+            const SignInButton(),
           ],
         ),
       ),

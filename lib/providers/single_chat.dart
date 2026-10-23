@@ -63,7 +63,7 @@ class SingleChat extends _$SingleChat {
     if (currentState == null) return [];
 
     _page += 1;
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     final queryParams = {'page': _page.toString()};
     final json = await apiClient.get(
@@ -82,10 +82,9 @@ class SingleChat extends _$SingleChat {
 
     //––– Deduplicate: only keep messages whose IDs we don’t already have
     final existingIds = currentState.messages.map((m) => m.id).toSet();
-    final newMessages =
-        moreChatDetails.messages
-            .where((m) => !existingIds.contains(m.id))
-            .toList();
+    final newMessages = moreChatDetails.messages
+        .where((m) => !existingIds.contains(m.id))
+        .toList();
 
     final updatedMessages = [...currentState.messages, ...newMessages];
     final updatedChat = currentState.copyWith(messages: updatedMessages);
@@ -96,7 +95,7 @@ class SingleChat extends _$SingleChat {
   }
 
   Future<void> addParticipants(List<String> participantsUsernames) async {
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     await apiClient.post('${ApiRoutes.group}/$_chatId', {
       'usernames': participantsUsernames,
@@ -107,7 +106,7 @@ class SingleChat extends _$SingleChat {
   }
 
   Future<void> leaveGroupChat() async {
-    final apiClient = ref.watch(apiClientProvider);
+    final apiClient = ref.read(apiClientProvider);
 
     await apiClient.put('${ApiRoutes.group}/leave/$_chatId', {});
 

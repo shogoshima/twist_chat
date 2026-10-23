@@ -1,265 +1,209 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/global_chat.dart';
-import 'package:twist_chat/providers/search_user.dart';
 import 'package:twist_chat/providers/single_chat.dart';
-import 'package:twist_chat/widgets/widgets.dart';
+import 'package:twist_chat/widgets/modal_header.dart';
+import 'package:twist_chat/widgets/show_add_user_modal.dart';
+import 'package:twist_chat/widgets/show_dialog.dart';
+import 'package:twist_chat/widgets/show_edit_group_info_modal.dart';
+import 'package:twist_chat/widgets/show_user_dialog.dart';
 
-Future<void> showGroupChatModal(
-  BuildContext context,
-  WidgetRef ref,
-  String chatId,
-) {
-  // Watch the providers for chat summary and chat details
-  final chatSummaries = ref.watch(globalChatProvider);
-  final chatDetails = ref.watch(singleChatProvider(chatId));
-
+Future<void> showGroupChatModal(BuildContext context, String chatId) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return DraggableScrollableSheet(
-            initialChildSize: 0.9, // 90% of screen height
-            minChildSize: 0.7, // How much it can shrink
-            maxChildSize: 0.95, // How much it can expand
-            expand: false, // Prevents immediate full height take-over
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    builder: (context) => _GroupChatSheet(chatId: chatId),
+  );
+}
+
+class _GroupChatSheet extends ConsumerWidget {
+  const _GroupChatSheet({required this.chatId});
+
+  final String chatId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chatSummary = ref.watch(
+      globalChatProvider.select(
+        (chats) => chats.whenData(
+          (summaries) => summaries.where((e) => e.chatId == chatId).firstOrNull,
+        ),
+      ),
+    );
+    final chatDetails = ref.watch(singleChatProvider(chatId));
+    final cardColor = Theme.of(context).colorScheme.surfaceContainerHigh;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.9,
+      minChildSize: 0.7,
+      maxChildSize: 0.95,
+      // Size to the content instead of taking the full height right away.
+      expand: false,
+      builder: (context, scrollController) {
+        return SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const ModalHeader(title: 'Group'),
+                chatSummary.when(
+                  data: (summary) => summary == null
+                      ? const SizedBox.shrink()
+                      : _ChatSummarySection(summary: summary),
+                  error: (error, stackTrace) =>
+                      const Center(child: Text('Oops! Something went wrong')),
+                  loading: () => const CircularProgressIndicator(),
                 ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header Section with Title & Close Button
-                        _buildHeader(context),
-                        // Chat Summary Section (chat photo, name, edit option)
-                        chatSummaries.when(
-                          data: (summaries) {
-                            final summary = summaries.firstWhere(
-                              (e) => e.chatId == chatId,
-                            );
-                            return _buildChatSummarySection(
-                              context,
-                              ref,
-                              summary,
-                            );
-                          },
-                          error:
-                              (error, stackTrace) => Center(
-                                child: Text('Oops! Something went wrong'),
-                              ),
-                          loading: () => CircularProgressIndicator(),
-                        ),
-                        // Participants List Card Section
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHigh,
-                            child: chatDetails.when(
-                              data:
-                                  (details) => _buildParticipantsList(details),
-                              error:
-                                  (error, stackTrace) => Center(
-                                    child: Text('Oops! Something went wrong'),
-                                  ),
-                              loading: () => CircularProgressIndicator(),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHigh,
-                            child: _buildLeaveButton(chatId),
-                          ),
-                        ),
-                        SizedBox(height: 32),
-                      ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: cardColor,
+                    child: chatDetails.when(
+                      data: (details) => _ParticipantsList(details: details),
+                      error: (error, stackTrace) => const Center(
+                        child: Text('Oops! Something went wrong'),
+                      ),
+                      loading: () => const CircularProgressIndicator(),
                     ),
                   ),
                 ),
-              );
-            },
-          );
-        },
-      );
-    },
-  );
-}
-
-/// Build the header with close button.
-Widget _buildHeader(BuildContext context) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      SizedBox(width: 48),
-      Text(
-        'Group',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      IconButton(
-        icon: Icon(Icons.close),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-    ],
-  );
-}
-
-/// Build chat summary section: photo, name, and edit button.
-Widget _buildChatSummarySection(
-  BuildContext context,
-  WidgetRef ref,
-  ChatSummary summary,
-) {
-  return Column(
-    children: [
-      // Show chat photo (or placeholder)
-      summary.chatPhoto != null
-          ? CircleAvatar(
-            backgroundImage: NetworkImage(summary.chatPhoto!),
-            radius: 60,
-          )
-          : CircleAvatar(backgroundColor: Colors.blueGrey, radius: 60),
-      SizedBox(height: 10),
-      // Show chat name
-      Text(summary.chatName, style: Theme.of(context).textTheme.headlineMedium),
-      // 'Edit info' button
-      TextButton(
-        onPressed: () {
-          showEditGroupInfoModal(
-            context,
-            ref,
-            summary.chatId,
-            summary.chatName,
-          );
-        },
-        child: Text('Edit info'),
-      ),
-    ],
-  );
-}
-
-/// Build the participants ListView with dividers.
-Widget _buildParticipantsList(ChatDetails details) {
-  return Consumer(
-    builder: (context, ref, child) {
-      return ListView.separated(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: details.participants.length + 1,
-        separatorBuilder:
-            (context, index) =>
-                Divider(height: 0.5, thickness: 0.5, color: Colors.white10),
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: cardColor,
+                    child: _LeaveGroupTile(chatId: chatId),
+                  ),
                 ),
-              ),
-              leading: Icon(Icons.person_add_alt),
-              title: Text('Add more participants'),
-              onTap: () {
-                showAddUserModal(
-                  context,
-                  ref,
-                  details.chatId,
-                  details.participants,
-                );
-              },
-            );
-          }
-
-          final Profile participant = details.participants[index - 1];
-          if (index == details.participants.length) {
-            return ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-              ),
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(participant.photoUrl),
-              ),
-              title: Text(participant.displayName, overflow: TextOverflow.fade),
-              onTap: () async {
-                Profile? user = await ref.read(
-                  searchUserProvider(participant.username).future,
-                );
-                if (user != null) {
-                  if (!context.mounted) return;
-                  showUserDialog(context, user);
-                }
-              },
-            );
-          }
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(participant.photoUrl),
+                const SizedBox(height: 32),
+              ],
             ),
-            title: Text(participant.displayName, overflow: TextOverflow.fade),
-            onTap: () async {
-              Profile? user = await ref.read(
-                searchUserProvider(participant.username).future,
-              );
-              if (user != null) {
-                if (!context.mounted) return;
-                showUserDialog(context, user);
-              }
-            },
-          );
-        },
-      );
-    },
-  );
+          ),
+        );
+      },
+    );
+  }
 }
 
-Widget _buildLeaveButton(String chatId) {
-  return Consumer(
-    builder: (context, ref, child) {
-      return ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        leading: Icon(Icons.exit_to_app),
-        title: Text('Leave group chat'),
-        onTap: () {
-          showConfirmDialog(
-            context,
-            'Leave group chat',
-            'You won’t be able to see the messages of this group anymore, unless someone add you again.\n\nDo you really want to go ahead?',
-            () {
-              ref.read(singleChatProvider(chatId).notifier).leaveGroupChat();
+/// Chat photo, name, and edit button.
+class _ChatSummarySection extends StatelessWidget {
+  const _ChatSummarySection({required this.summary});
 
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-          );
-        },
-      );
-    },
+  final ChatSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          backgroundImage: summary.chatPhoto != null
+              ? CachedNetworkImageProvider(summary.chatPhoto!)
+              : null,
+        ),
+        const SizedBox(height: 10),
+        Text(summary.chatName, style: theme.textTheme.headlineMedium),
+        TextButton(
+          onPressed: () =>
+              showEditGroupInfoModal(context, summary.chatId, summary.chatName),
+          child: const Text('Edit info'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ParticipantsList extends StatelessWidget {
+  const _ParticipantsList({required this.details});
+
+  final ChatDetails details;
+
+  static const _topShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
   );
+  static const _bottomShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final participants = details.participants;
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: participants.length + 1,
+      separatorBuilder: (context, index) =>
+          const Divider(height: 0.5, thickness: 0.5),
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return ListTile(
+            shape: _topShape,
+            leading: const Icon(Icons.person_add_alt),
+            title: const Text('Add more participants'),
+            onTap: () =>
+                showAddUserModal(context, details.chatId, participants),
+          );
+        }
+
+        final participant = participants[index - 1];
+        return ListTile(
+          shape: index == participants.length ? _bottomShape : null,
+          leading: CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(participant.photoUrl),
+          ),
+          title: Text(participant.displayName, overflow: TextOverflow.fade),
+          onTap: () => showUserDialog(context, participant),
+        );
+      },
+    );
+  }
+}
+
+class _LeaveGroupTile extends ConsumerWidget {
+  const _LeaveGroupTile({required this.chatId});
+
+  final String chatId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+      leading: const Icon(Icons.exit_to_app),
+      title: const Text('Leave group chat'),
+      onTap: () async {
+        final confirmed = await showConfirmDialog(
+          context,
+          'Leave group chat',
+          'You won’t be able to see the messages of this group anymore, unless someone add you again.\n\nDo you really want to go ahead?',
+        );
+        if (!confirmed || !context.mounted) return;
+
+        final messenger = ScaffoldMessenger.of(context);
+        try {
+          await ref.read(singleChatProvider(chatId).notifier).leaveGroupChat();
+        } catch (error) {
+          messenger.showSnackBar(SnackBar(content: Text('Error: $error')));
+          return;
+        }
+        if (!context.mounted) return;
+        // Close this sheet and the chat page beneath it.
+        Navigator.of(context)
+          ..pop()
+          ..pop();
+      },
+    );
+  }
 }

@@ -7,15 +7,7 @@ part 'fcm_token.g.dart';
 @riverpod
 Future<void> fcmToken(Ref ref) async {
   // 1. Request permission on iOS
-  final settings = await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
+  final settings = await FirebaseMessaging.instance.requestPermission();
 
   if (settings.authorizationStatus == AuthorizationStatus.authorized ||
       settings.authorizationStatus == AuthorizationStatus.provisional) {
@@ -30,10 +22,13 @@ Future<void> fcmToken(Ref ref) async {
     }
 
     // 4. Handle token refresh
-    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+    final subscription = FirebaseMessaging.instance.onTokenRefresh.listen((
+      newToken,
+    ) async {
       await ref.read(apiClientProvider).put(ApiRoutes.fcm, {
         'fcm_token': newToken,
       });
     });
+    ref.onDispose(subscription.cancel);
   }
 }

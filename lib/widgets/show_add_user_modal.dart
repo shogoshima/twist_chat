@@ -1,207 +1,155 @@
 import 'dart:developer';
+
 import 'package:avatar_stack/animated_avatar_stack.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/search_user.dart';
 import 'package:twist_chat/providers/single_chat.dart';
+import 'package:twist_chat/widgets/modal_header.dart';
+import 'package:twist_chat/widgets/size_switcher.dart';
 
 Future<void> showAddUserModal(
   BuildContext context,
-  WidgetRef ref,
   String chatId,
   List<Profile> presentParticipants,
 ) {
-  final TextEditingController usernameController = TextEditingController();
-  List<Profile> selectedUsers = [];
-
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            // Adjust for soft keyboard
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+    builder: (context) =>
+        _AddUserSheet(chatId: chatId, presentParticipants: presentParticipants),
+  );
+}
+
+class _AddUserSheet extends ConsumerStatefulWidget {
+  const _AddUserSheet({
+    required this.chatId,
+    required this.presentParticipants,
+  });
+
+  final String chatId;
+  final List<Profile> presentParticipants;
+
+  @override
+  ConsumerState<_AddUserSheet> createState() => _AddUserSheetState();
+}
+
+class _AddUserSheetState extends ConsumerState<_AddUserSheet> {
+  final _usernameController = TextEditingController();
+  final List<Profile> _selectedUsers = [];
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addUser() async {
+    final username = _usernameController.text.trim();
+    if (username.isEmpty) return;
+
+    try {
+      final user = await ref.read(searchUserProvider(username).future);
+      if (user == null || !mounted) return;
+      // Only add if not already in the chat or in the list.
+      if (widget.presentParticipants.contains(user) ||
+          _selectedUsers.contains(user)) {
+        return;
+      }
+      setState(() => _selectedUsers.add(user));
+      _usernameController.clear();
+    } catch (error) {
+      log(error.toString());
+    }
+  }
+
+  Future<void> _addParticipants() async {
+    setState(() => _submitting = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(singleChatProvider(widget.chatId).notifier)
+          .addParticipants(_selectedUsers.map((e) => e.username).toList());
+    } catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text('Error: $error')));
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+    if (!mounted) return;
+    // Close this sheet and the group sheet beneath it.
+    Navigator.of(context)
+      ..pop()
+      ..pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      // Keep the sheet above the keyboard.
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ModalHeader(title: 'Add More Participants'),
+            const SizedBox(height: 16),
+            SizeSwitcher(
+              child: _selectedUsers.isEmpty
+                  ? const SizedBox.shrink(key: ValueKey('empty'))
+                  : Padding(
+                      key: const ValueKey('participants'),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: AnimatedAvatarStack(
+                        height: 60,
+                        avatars: [
+                          for (final user in _selectedUsers)
+                            CachedNetworkImageProvider(user.photoUrl),
+                        ],
+                      ),
+                    ),
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildHeader(context),
-                  SizedBox(height: 16),
-                  _buildSelectedUsersPreview(selectedUsers),
-                  SizedBox(height: 16),
-                  _buildUserSearchField(
-                    context,
-                    ref,
-                    usernameController,
-                    presentParticipants,
-                    selectedUsers,
-                    setState,
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Add participants',
+                  border: const OutlineInputBorder(),
+                  hintText: 'Enter username',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.person_add_alt),
+                    onPressed: _addUser,
                   ),
-                  SizedBox(height: 16),
-                  _buildAddParticipantsButton(
-                    context,
-                    ref,
-                    chatId,
-                    selectedUsers,
-                  ),
-                  SizedBox(height: 32),
-                ],
+                ),
               ),
             ),
-          );
-        },
-      );
-    },
-  );
-}
-
-// Header with title and close button.
-Widget _buildHeader(BuildContext context) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      SizedBox(width: 48),
-      Text(
-        'Add More Participants',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      IconButton(
-        icon: Icon(Icons.close),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-    ],
-  );
-}
-
-// Display selected user avatars with an AnimatedSwitcher.
-Widget _buildSelectedUsersPreview(List<Profile> selectedUsers) {
-  return AnimatedSwitcher(
-    duration: Duration(milliseconds: 300),
-    transitionBuilder: (Widget child, Animation<double> animation) {
-      return SizeTransition(
-        sizeFactor: animation,
-        axis: Axis.vertical,
-        alignment: AlignmentDirectional.topStart,
-        child: child,
-      );
-    },
-    child:
-        selectedUsers.isEmpty
-            ? SizedBox(key: ValueKey('empty'))
-            : Padding(
-              key: ValueKey('participants'),
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: AnimatedAvatarStack(
-                height: 60,
-                avatars: [
-                  for (var i = 0; i < selectedUsers.length; i++)
-                    NetworkImage(selectedUsers[i].photoUrl),
-                ],
-              ),
+            const SizedBox(height: 16),
+            SizeSwitcher(
+              child: _selectedUsers.isEmpty
+                  ? const SizedBox.shrink(key: ValueKey('empty'))
+                  : Padding(
+                      key: const ValueKey('button'),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: FilledButton(
+                        onPressed: _submitting ? null : _addParticipants,
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                        ),
+                        child: const Text('Add participants'),
+                      ),
+                    ),
             ),
-  );
-}
-
-// Build the search text field to add a new user.
-Widget _buildUserSearchField(
-  BuildContext context,
-  WidgetRef ref,
-  TextEditingController usernameController,
-  List<Profile> presentParticipants,
-  List<Profile> selectedUsers,
-  StateSetter setState,
-) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    child: TextField(
-      controller: usernameController,
-      decoration: InputDecoration(
-        labelText: 'Add participants',
-        border: OutlineInputBorder(),
-        hintText: 'Enter username',
-        suffixIcon: IconButton(
-          icon: Icon(Icons.person_add_alt),
-          onPressed: () async {
-            final username = usernameController.text.trim();
-            if (username.isNotEmpty) {
-              try {
-                final userData = await ref.read(
-                  searchUserProvider(username).future,
-                );
-                if (userData == null) return;
-                // Only add if not already in the list.
-                if (!presentParticipants.contains(userData) &&
-                    !selectedUsers.contains(userData)) {
-                  setState(() {
-                    selectedUsers.add(userData);
-                  });
-                  usernameController.clear();
-                }
-              } catch (error) {
-                log(error.toString());
-              }
-            }
-          },
+            const SizedBox(height: 32),
+          ],
         ),
       ),
-    ),
-  );
-}
-
-// Build the button to add participants.
-Widget _buildAddParticipantsButton(
-  BuildContext context,
-  WidgetRef ref,
-  String chatId,
-  List<Profile> selectedUsers,
-) {
-  return AnimatedSwitcher(
-    duration: Duration(milliseconds: 300),
-    transitionBuilder: (Widget child, Animation<double> animation) {
-      return SizeTransition(
-        sizeFactor: animation,
-        axis: Axis.vertical,
-        alignment: AlignmentDirectional.topStart,
-        child: child,
-      );
-    },
-    child:
-        selectedUsers.isEmpty
-            ? SizedBox(key: ValueKey('empty'))
-            : Padding(
-              key: ValueKey('button'),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: FilledButton(
-                onPressed: () {
-                  try {
-                    ref
-                        .read(singleChatProvider(chatId).notifier)
-                        .addParticipants(
-                          selectedUsers.map((e) => e.username).toList(),
-                        );
-
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                  } catch (error) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Error: $error')));
-                    Navigator.of(context).pop();
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  minimumSize: Size(double.infinity, 48),
-                ),
-                child: Text('Add participants'),
-              ),
-            ),
-  );
+    );
+  }
 }

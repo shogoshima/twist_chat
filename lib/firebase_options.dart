@@ -70,9 +70,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1093568117572',
     projectId: 'twistchat-74696',
     storageBucket: 'twistchat-74696.firebasestorage.app',
-    androidClientId: '1093568117572-d8o8l0bsvt8mfng0rgkobh46je9ricpb.apps.googleusercontent.com',
-    iosClientId: '1093568117572-ff1qdrapru3upatvav09l5ngmqsl4l67.apps.googleusercontent.com',
+    androidClientId:
+        '1093568117572-d8o8l0bsvt8mfng0rgkobh46je9ricpb.apps.googleusercontent.com',
+    iosClientId:
+        '1093568117572-ff1qdrapru3upatvav09l5ngmqsl4l67.apps.googleusercontent.com',
     iosBundleId: 'com.shogoshima.twistchat',
   );
-
 }

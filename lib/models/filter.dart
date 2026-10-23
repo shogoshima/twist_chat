@@ -13,6 +13,5 @@ abstract class Filter with _$Filter {
     required String command,
   }) = _Filter;
 
-  factory Filter.fromJson(Map<String, Object?> json) =>
-      _$FilterFromJson(json);
+  factory Filter.fromJson(Map<String, Object?> json) => _$FilterFromJson(json);
 }

@@ -39,7 +39,7 @@ final class WebSocketProvider
   WebSocket create() => WebSocket();
 }
 
-String _$webSocketHash() => r'4f5979d86b20973c5de3e4cd918995e918cc8575';
+String _$webSocketHash() => r'bdbd5e25480787443132e20b35fec0df8108725d';
 
 /// App-wide connection: lives for the whole session and is rebuilt (closing the
 /// previous channel) whenever the signed-in user changes.

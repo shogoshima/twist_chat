@@ -4,8 +4,7 @@ import 'package:twist_chat/models/models.dart';
 part 'chat_details.freezed.dart';
 part 'chat_details.g.dart';
 
-/// Model that the sqflite will save
-/// This isn't for the communication with the backend
+/// A chat's participants and one page of its messages, newest first.
 @freezed
 abstract class ChatDetails with _$ChatDetails {
   const factory ChatDetails({

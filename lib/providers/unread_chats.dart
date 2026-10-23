@@ -5,10 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twist_chat/common/notification_plugin.dart';
 
-part 'notification.g.dart';
+part 'unread_chats.g.dart';
 
+/// Ids of the chats with messages the user hasn't seen, persisted across
+/// launches.
 @riverpod
-class Notification extends _$Notification {
+class UnreadChats extends _$UnreadChats {
   static const _prefsKey = 'unread_chats';
 
   @override
@@ -51,7 +53,7 @@ class Notification extends _$Notification {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_prefsKey, updated.toList());
 
-    final android = AndroidNotificationDetails(
+    const android = AndroidNotificationDetails(
       'default',
       'Default',
       importance: Importance.max,
@@ -61,7 +63,7 @@ class Notification extends _$Notification {
       id: 0,
       title: '${message.data['sender_name']} says:',
       body: message.data['text'],
-      notificationDetails: NotificationDetails(android: android),
+      notificationDetails: const NotificationDetails(android: android),
       payload: message.data['chat_id'],
     );
   }

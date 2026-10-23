@@ -40,7 +40,7 @@ final class ApiClientProvider extends $NotifierProvider<ApiClient, ApiClient> {
   }
 }
 
-String _$apiClientHash() => r'c8ae956de1eb19720440c128cf143ac7f39f3e73';
+String _$apiClientHash() => r'ec9e4a62c2916c7b2d403f8b726cf0504a739a12';
 
 abstract class _$ApiClient extends $Notifier<ApiClient> {
   ApiClient build();

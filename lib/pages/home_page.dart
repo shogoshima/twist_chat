@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +9,11 @@ import 'package:twist_chat/providers/active_filter.dart';
 import 'package:twist_chat/providers/fcm_token.dart';
 import 'package:twist_chat/providers/filter.dart';
 import 'package:twist_chat/providers/global_chat.dart';
-import 'package:twist_chat/providers/notification.dart';
 import 'package:twist_chat/providers/open_chat.dart';
+import 'package:twist_chat/providers/unread_chats.dart';
 import 'package:twist_chat/providers/web_socket.dart';
-import 'package:twist_chat/widgets/widgets.dart';
+import 'package:twist_chat/widgets/disappearing_bottom_navigation_bar.dart';
+import 'package:twist_chat/widgets/disappearing_navigation_rail.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -20,30 +23,22 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  static const _titles = ['Chats', 'Settings'];
+
   int _currentPageIndex = 0;
   final PageController _pageController = PageController();
-  final List<String> _titles = ['Chats', 'Settings'];
-
-  bool wideScreen = false;
+  late final StreamSubscription<RemoteMessage> _foregroundMessages;
 
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    _foregroundMessages = FirebaseMessaging.onMessage.listen((message) {
       if (message.data.isEmpty) return;
-      final openChatId = ref.watch(openChatProvider);
+      final openChatId = ref.read(openChatProvider);
       if (openChatId == null || openChatId != message.data['chat_id']) {
-        ref.read(notificationProvider.notifier).handleIncomingMessage(message);
+        ref.read(unreadChatsProvider.notifier).handleIncomingMessage(message);
       }
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final double width = MediaQuery.of(context).size.width;
-    wideScreen = width > 600;
   }
 
   void _onDestinationSelected(int index) {
@@ -66,113 +61,37 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   void dispose() {
+    _foregroundMessages.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(openChatProvider);
-    ref.watch(filterProvider);
-    ref.watch(activeFilterProvider);
-    ref.watch(fcmTokenProvider);
-    ref.watch(notificationProvider);
-    ref.watch(globalChatProvider);
+    // Keep the session providers alive while signed in. Listening instead of
+    // watching avoids rebuilding this page whenever one changes (the chat
+    // list does on every incoming message).
+    ref.listen(openChatProvider, (_, _) {});
+    ref.listen(filterProvider, (_, _) {});
+    ref.listen(activeFilterProvider, (_, _) {});
+    ref.listen(fcmTokenProvider, (_, _) {});
+    ref.listen(unreadChatsProvider, (_, _) {});
+    ref.listen(globalChatProvider, (_, _) {});
+
+    // sizeOf only depends on the size, so keyboard insets animating (e.g.
+    // while typing in a chat pushed on top) don't rebuild this page.
+    final wideScreen = MediaQuery.sizeOf(context).width > 600;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         title: Text(_titles[_currentPageIndex]),
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final webSocketState = ref.watch(webSocketProvider);
-                    return webSocketState.when(
-                      data: (channel) {
-                        if (channel != null) {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // A small animated green dot.
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              const Text(
-                                "Online",
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // A red dot for a null channel (disconnected).
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              const Text(
-                                "Offline",
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                      loading:
-                          () => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                "Connecting...",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                      error:
-                          (error, stack) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.error, color: Colors.red, size: 16),
-                              SizedBox(width: 5),
-                              Text("Error", style: TextStyle(fontSize: 12)),
-                            ],
-                          ),
-                    );
-                  },
-                ),
+                padding: EdgeInsets.all(6.0),
+                child: _ConnectionStatus(),
               ),
             ),
           ),
@@ -180,13 +99,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       body: Row(
         children: [
-          if (wideScreen) // Mostrando a barra lateral condicionalmente
+          if (wideScreen)
             DisappearingNavigationRail(
               selectedIndex: _currentPageIndex,
               onDestinationSelected: _onDestinationSelected,
             ),
           Expanded(
-            // Directly use the PageView to manage the pages.
             child: PageView(
               controller: _pageController,
               onPageChanged: _onPageChanged,
@@ -196,13 +114,63 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar:
-          wideScreen // Mostrando a barra inferior condicionalmente
-              ? null
-              : DisappearingBottomNavigationBar(
-                selectedIndex: _currentPageIndex,
-                onDestinationSelected: _onDestinationSelected,
-              ),
+      bottomNavigationBar: wideScreen
+          ? null
+          : DisappearingBottomNavigationBar(
+              selectedIndex: _currentPageIndex,
+              onDestinationSelected: _onDestinationSelected,
+            ),
+    );
+  }
+}
+
+/// Whether the real-time connection is up.
+class _ConnectionStatus extends ConsumerWidget {
+  const _ConnectionStatus();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final (Widget indicator, String label) = switch (ref.watch(
+      webSocketProvider,
+    )) {
+      AsyncData(value: _?) => (const _Dot(color: Colors.green), 'Online'),
+      AsyncData() => (const _Dot(color: Colors.red), 'Offline'),
+      AsyncError() => (
+        const Icon(Icons.error, color: Colors.red, size: 16),
+        'Error',
+      ),
+      _ => (
+        const SizedBox.square(
+          dimension: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        'Connecting...',
+      ),
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        indicator,
+        const SizedBox(width: 5),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    // Animates the color when the connection status flips.
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

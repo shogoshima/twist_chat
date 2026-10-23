@@ -30,12 +30,11 @@ class _FadingTextButtonState extends State<FadingTextButton> {
   void _onTapUp(TapUpDetails details) {
     // Slight delay makes the animation feel smoother.
     Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
       setState(() {
         _pressed = false;
       });
-      if (widget.onTap != null) {
-        widget.onTap!();
-      }
+      widget.onTap?.call();
     });
   }
 
@@ -63,15 +62,17 @@ class _FadingTextButtonState extends State<FadingTextButton> {
               style: widget.style ?? Theme.of(context).textTheme.titleLarge,
               overflow: TextOverflow.ellipsis,
             ),
-            widget.content != null
-                ? Text(
-                  widget.content!,
-                  style:
-                      widget.style ??
-                      TextStyle(fontSize: 13, color: Colors.white60),
-                  overflow: TextOverflow.ellipsis,
-                )
-                : SizedBox(),
+            if (widget.content case final content?)
+              Text(
+                content,
+                style:
+                    widget.style ??
+                    TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                overflow: TextOverflow.ellipsis,
+              ),
           ],
         ),
       ),

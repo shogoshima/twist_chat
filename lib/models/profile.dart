@@ -12,8 +12,9 @@ abstract class Profile with _$Profile {
     required String displayName,
     required String username,
     required String photoUrl,
-    DateTime? lastSeen
+    DateTime? lastSeen,
   }) = _Profile;
 
-  factory Profile.fromJson(Map<String, Object?> json) => _$ProfileFromJson(json);
+  factory Profile.fromJson(Map<String, Object?> json) =>
+      _$ProfileFromJson(json);
 }

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ProfileCard extends StatelessWidget {
@@ -20,11 +21,14 @@ class ProfileCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 40),
+            CircleAvatar(
+              backgroundImage: CachedNetworkImageProvider(photoUrl),
+              radius: 40,
+            ),
             const SizedBox(height: 5),
             Text(name),
             const SizedBox(height: 2),
-            Text(username, style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(username, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),

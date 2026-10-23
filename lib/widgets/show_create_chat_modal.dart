@@ -1,274 +1,179 @@
 import 'dart:developer';
+
 import 'package:avatar_stack/animated_avatar_stack.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twist_chat/common/validators.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/providers/global_chat.dart';
 import 'package:twist_chat/providers/search_user.dart';
+import 'package:twist_chat/widgets/modal_header.dart';
+import 'package:twist_chat/widgets/size_switcher.dart';
 
-Future<void> showCreateChatModal(BuildContext context, WidgetRef ref) {
-  // Controllers and keys.
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController groupNameController = TextEditingController();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  // Current logged in user.
-  final user = FirebaseAuth.instance.currentUser!;
-  // In-memory selected users list.
-  List<Profile> selectedUsers = [];
-
+Future<void> showCreateChatModal(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            // Adjust for soft keyboard.
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildHeader(context),
-                  _buildSelectedUsers(user, selectedUsers),
-                  _buildSearchField(
-                    context,
-                    ref,
-                    usernameController,
-                    selectedUsers,
-                    setState,
-                  ),
-                  _buildGroupNameInput(
-                    formKey,
-                    groupNameController,
-                    selectedUsers,
-                  ),
-                  SizedBox(height: 16),
-                  _buildCreateChatButton(
-                    context,
-                    ref,
-                    selectedUsers,
-                    groupNameController,
-                    formKey,
-                  ),
-                  SizedBox(height: 32),
+    builder: (context) => const _CreateChatSheet(),
+  );
+}
+
+class _CreateChatSheet extends ConsumerStatefulWidget {
+  const _CreateChatSheet();
+
+  @override
+  ConsumerState<_CreateChatSheet> createState() => _CreateChatSheetState();
+}
+
+class _CreateChatSheetState extends ConsumerState<_CreateChatSheet> {
+  final _usernameController = TextEditingController();
+  final _groupNameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final List<Profile> _selectedUsers = [];
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _groupNameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addUser() async {
+    final username = _usernameController.text.trim();
+    if (username.isEmpty) return;
+
+    try {
+      final user = await ref.read(searchUserProvider(username).future);
+      if (user == null || !mounted) return;
+      // Only add if not already in list and not the current user.
+      if (user.id == FirebaseAuth.instance.currentUser!.uid ||
+          _selectedUsers.contains(user)) {
+        return;
+      }
+      setState(() => _selectedUsers.add(user));
+      _usernameController.clear();
+    } catch (error) {
+      log(error.toString());
+    }
+  }
+
+  Future<void> _createChat() async {
+    final isGroup = _selectedUsers.length > 1;
+    if (isGroup && !_formKey.currentState!.validate()) return;
+
+    setState(() => _submitting = true);
+    final chats = ref.read(globalChatProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (isGroup) {
+        await chats.createNewGroupChat(
+          _selectedUsers.map((user) => user.username).toList(),
+          _groupNameController.text,
+        );
+      } else {
+        await chats.createNewSingleChat(_selectedUsers.single.username);
+      }
+    } catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text('Error: $error')));
+    }
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUserPhoto = FirebaseAuth.instance.currentUser?.photoURL;
+    return Padding(
+      // Keep the sheet above the keyboard.
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ModalHeader(title: 'New Chat'),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: AnimatedAvatarStack(
+                height: 60,
+                avatars: [
+                  // The current user's photo is always shown.
+                  if (currentUserPhoto != null)
+                    CachedNetworkImageProvider(currentUserPhoto),
+                  for (final user in _selectedUsers)
+                    CachedNetworkImageProvider(user.photoUrl),
                 ],
               ),
             ),
-          );
-        },
-      );
-    },
-  );
-}
-
-// HEADER: AppBar like header with title and close button.
-Widget _buildHeader(BuildContext context) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      SizedBox(width: 48),
-      Text(
-        'New Chat',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      IconButton(
-        icon: Icon(Icons.close),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-    ],
-  );
-}
-
-// SELECTED USERS: Display the current selected users using AnimatedAvatarStack.
-Widget _buildSelectedUsers(User currentUser, List<Profile> selectedUsers) {
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: AnimatedAvatarStack(
-      height: 60,
-      avatars: [
-        // The current user's photo is always shown.
-        NetworkImage(currentUser.photoURL!),
-        // Then add the selected users.
-        for (var user in selectedUsers) NetworkImage(user.photoUrl),
-      ],
-    ),
-  );
-}
-
-// SEARCH FIELD: Display a text field for searching a user.
-Widget _buildSearchField(
-  BuildContext context,
-  WidgetRef ref,
-  TextEditingController usernameController,
-  List<Profile> selectedUsers,
-  StateSetter setState,
-) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    child: TextField(
-      controller: usernameController,
-      decoration: InputDecoration(
-        labelText: 'Search for a user',
-        border: OutlineInputBorder(),
-        hintText: 'Enter username',
-        suffixIcon: IconButton(
-          icon: Icon(Icons.person_add_alt),
-          onPressed: () async {
-            final username = usernameController.text.trim();
-            if (username.isNotEmpty) {
-              try {
-                final userData = await ref.read(
-                  searchUserProvider(username).future,
-                );
-                if (userData == null) return;
-                // Only add if not already in list and not the current user.
-                if (userData.id != FirebaseAuth.instance.currentUser!.uid &&
-                    !selectedUsers.contains(userData)) {
-                  setState(() {
-                    selectedUsers.add(userData);
-                  });
-                  usernameController.clear();
-                }
-              } catch (error) {
-                log(error.toString());
-              }
-            }
-          },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Search for a user',
+                  border: const OutlineInputBorder(),
+                  hintText: 'Enter username',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.person_add_alt),
+                    onPressed: _addUser,
+                  ),
+                ),
+              ),
+            ),
+            // A group needs a name.
+            SizeSwitcher(
+              child: _selectedUsers.length <= 1
+                  ? const SizedBox.shrink(key: ValueKey('empty'))
+                  : Padding(
+                      key: const ValueKey('groupName'),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _groupNameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter a group name*',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: validateGroupName,
+                        ),
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 16),
+            SizeSwitcher(
+              child: _selectedUsers.isEmpty
+                  ? const SizedBox.shrink(key: ValueKey('empty'))
+                  : Padding(
+                      key: const ValueKey('button'),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: FilledButton(
+                        onPressed: _submitting ? null : _createChat,
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(scale: animation, child: child),
+                          child: _selectedUsers.length == 1
+                              ? const Text('Create DM', key: ValueKey('single'))
+                              : const Text(
+                                  'Create Group Chat',
+                                  key: ValueKey('group'),
+                                ),
+                        ),
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 32),
+          ],
         ),
       ),
-    ),
-  );
-}
-
-// GROUP NAME INPUT: If there is more than one selected user, display a form to input group name.
-Widget _buildGroupNameInput(
-  GlobalKey<FormState> formKey,
-  TextEditingController groupNameController,
-  List<Profile> selectedUsers,
-) {
-  return AnimatedSwitcher(
-    duration: const Duration(milliseconds: 300),
-    transitionBuilder: (Widget child, Animation<double> animation) {
-      return SizeTransition(
-        sizeFactor: animation,
-        axis: Axis.vertical,
-        alignment: AlignmentDirectional.topStart,
-        child: child,
-      );
-    },
-    child:
-        selectedUsers.length <= 1
-            ? SizedBox(key: ValueKey('empty'))
-            : Padding(
-              key: ValueKey('groupName'),
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Form(
-                key: formKey,
-                child: TextFormField(
-                  controller: groupNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Enter a group name*',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Group name required';
-                    }
-                    if (value.length > 30) {
-                      return 'Group name too long';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ),
-  );
-}
-
-// CREATE CHAT BUTTON: Button to create a chat (single or group).
-Widget _buildCreateChatButton(
-  BuildContext context,
-  WidgetRef ref,
-  List<Profile> selectedUsers,
-  TextEditingController groupNameController,
-  GlobalKey<FormState> formKey,
-) {
-  return AnimatedSwitcher(
-    duration: Duration(milliseconds: 300),
-    transitionBuilder: (Widget child, Animation<double> animation) {
-      return SizeTransition(
-        sizeFactor: animation,
-        axis: Axis.vertical,
-        alignment: AlignmentDirectional.topStart,
-        child: child,
-      );
-    },
-    child:
-        selectedUsers.isEmpty
-            ? SizedBox(key: ValueKey('empty'))
-            : Padding(
-              key: ValueKey('button'),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: FilledButton(
-                onPressed: () {
-                  try {
-                    if (selectedUsers.length == 1) {
-                      // Create single chat
-                      ref
-                          .read(globalChatProvider.notifier)
-                          .createNewSingleChat(selectedUsers[0].username);
-
-                      if (!context.mounted) return;
-                      Navigator.of(context).pop();
-                    } else {
-                      // Create group chat
-                      if (formKey.currentState!.validate()) {
-                        ref
-                            .read(globalChatProvider.notifier)
-                            .createNewGroupChat(
-                              selectedUsers
-                                  .map((user) => user.username)
-                                  .toList(),
-                              groupNameController.text,
-                            );
-
-                        if (!context.mounted) return;
-                        Navigator.of(context).pop();
-                      }
-                    }
-                  } catch (error) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Error: $error')));
-                    Navigator.of(context).pop();
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  minimumSize: Size(double.infinity, 48),
-                ),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (
-                    Widget child,
-                    Animation<double> animation,
-                  ) {
-                    return ScaleTransition(scale: animation, child: child);
-                  },
-                  child:
-                      selectedUsers.length == 1
-                          ? Text('Create DM', key: ValueKey('single'))
-                          : Text('Create Group Chat', key: ValueKey('group')),
-                ),
-              ),
-            ),
-  );
+    );
+  }
 }

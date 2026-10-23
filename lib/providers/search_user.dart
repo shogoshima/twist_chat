@@ -8,7 +8,7 @@ part 'search_user.g.dart';
 Future<Profile?> searchUser(Ref ref, String username) async {
   final apiClient = ref.watch(apiClientProvider);
 
-  final json = await apiClient.get("${ApiRoutes.users}/$username");
+  final json = await apiClient.get('${ApiRoutes.users}/$username');
   if (json['profile'] == null) {
     return null;
   }

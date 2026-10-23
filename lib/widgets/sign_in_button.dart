@@ -19,19 +19,18 @@ class SignInButton extends ConsumerWidget {
 
     return ElevatedButton(
       // Disable the button when signing in (loading state)
-      onPressed:
-          isSigningIn
-              ? null
-              : () async {
-                try {
-                  await ref.read(authProvider.notifier).login();
-                } catch (error) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error signing in: $error')),
-                  );
-                }
-              },
+      onPressed: isSigningIn
+          ? null
+          : () async {
+              try {
+                await ref.read(authProvider.notifier).login();
+              } catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error signing in: $error')),
+                );
+              }
+            },
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         backgroundColor: Theme.of(context).colorScheme.onSecondary,

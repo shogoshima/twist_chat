@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'notification.dart';
+part of 'unread_chats.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,34 +8,43 @@ part of 'notification.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Ids of the chats with messages the user hasn't seen, persisted across
+/// launches.
 
-@ProviderFor(Notification)
-const notificationProvider = NotificationProvider._();
+@ProviderFor(UnreadChats)
+const unreadChatsProvider = UnreadChatsProvider._();
 
-final class NotificationProvider
-    extends $AsyncNotifierProvider<Notification, Set<String>> {
-  const NotificationProvider._()
+/// Ids of the chats with messages the user hasn't seen, persisted across
+/// launches.
+final class UnreadChatsProvider
+    extends $AsyncNotifierProvider<UnreadChats, Set<String>> {
+  /// Ids of the chats with messages the user hasn't seen, persisted across
+  /// launches.
+  const UnreadChatsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'notificationProvider',
+        name: r'unreadChatsProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$notificationHash();
+  String debugGetCreateSourceHash() => _$unreadChatsHash();
 
   @$internal
   @override
-  Notification create() => Notification();
+  UnreadChats create() => UnreadChats();
 }
 
-String _$notificationHash() => r'9c3598605948129532613f73001f6af616f002be';
+String _$unreadChatsHash() => r'4159f53ed8f350770c3cf39b5ee524197f4a0df1';
 
-abstract class _$Notification extends $AsyncNotifier<Set<String>> {
+/// Ids of the chats with messages the user hasn't seen, persisted across
+/// launches.
+
+abstract class _$UnreadChats extends $AsyncNotifier<Set<String>> {
   FutureOr<Set<String>> build();
   @$mustCallSuper
   @override

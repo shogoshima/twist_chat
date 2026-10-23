@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twist_chat/providers/active_filter.dart';
 import 'package:twist_chat/providers/filter.dart';
 
-Future<void> showModificationModal(BuildContext context, WidgetRef ref) {
+Future<void> showModificationModal(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -28,17 +28,14 @@ Future<void> showModificationModal(BuildContext context, WidgetRef ref) {
                   itemBuilder: (context, index) {
                     final filter = filters[index];
                     return Card(
-                      color:
-                          activeFilter == filter.id
-                              ? Theme.of(context).highlightColor
-                              : Theme.of(context).cardColor,
+                      color: activeFilter == filter.id
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : null,
                       child: InkWell(
                         onTap: () {
-                          // Update the active text filter using the notifier.
                           ref
                               .read(activeFilterProvider.notifier)
                               .setActiveTextFilter(filter.id);
-                          // Optionally close the modal.
                           Navigator.pop(context);
                         },
                         child: Center(
@@ -47,14 +44,11 @@ Future<void> showModificationModal(BuildContext context, WidgetRef ref) {
                             children: [
                               Text(
                                 filter.emoji,
-                                style: TextStyle(fontSize: 20),
+                                style: const TextStyle(fontSize: 20),
                               ),
                               Text(
                                 filter.name,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white,
-                                ),
+                                style: const TextStyle(fontSize: 11),
                               ),
                             ],
                           ),

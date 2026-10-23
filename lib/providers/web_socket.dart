@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/models/web_socket_authentication.dart';
@@ -25,21 +26,32 @@ class WebSocket extends _$WebSocket {
   String? _userId;
   String? _idToken;
   Timer? _reconnectTimer;
-  final Duration _reconnectDelay = const Duration(milliseconds: 500);
-  bool _disposed = false;
+  AppLifecycleListener? _lifecycleListener;
+  final Duration _initialReconnectDelay = const Duration(milliseconds: 500);
+  final Duration _maxReconnectDelay = const Duration(seconds: 30);
+  int _reconnectAttempts = 0;
+  final Random _random = Random();
+
+  /// Bumped on every dispose. The notifier instance survives rebuilds, so a
+  /// connection attempt still awaiting its token compares against this to
+  /// know it belongs to a previous session.
+  int _session = 0;
 
   /// The build method is used for initialization.
   /// Here we await for the Google authentication and then create the connection.
   @override
   Future<WebSocketChannel?> build() async {
     ref.onDispose(() {
+      _session++;
       _reconnectTimer?.cancel();
+      _lifecycleListener?.dispose();
+      _lifecycleListener = null;
       _channel?.sink.close();
       _channel = null;
       _user = null;
       _userId = null;
       _idToken = null;
-      _disposed = true;
+      _reconnectAttempts = 0;
     });
 
     // Watch the authentication state so we reconnect on login and close on logout.
@@ -48,6 +60,9 @@ class WebSocket extends _$WebSocket {
 
     _user = user;
     _userId = user.uid;
+    // The backoff can grow while the app is suspended; retry right away when
+    // the user comes back instead of waiting it out.
+    _lifecycleListener = AppLifecycleListener(onResume: _reconnectNow);
 
     await _connect();
 
@@ -56,10 +71,9 @@ class WebSocket extends _$WebSocket {
 
   /// Connects to the WebSocket endpoint using the authenticated user’s ID.
   Future<void> _connect() async {
-    if (_disposed) return;
-
     final user = _user;
     if (user == null) return;
+    final session = _session;
 
     try {
       // Fetch the token on every (re)connection: Firebase ID tokens expire
@@ -67,46 +81,83 @@ class WebSocket extends _$WebSocket {
       // getIdToken() returns the cached token while valid and refreshes it
       // transparently once expired.
       _idToken = await user.getIdToken();
+      if (session != _session) return;
       if (_idToken == null) {
         throw StateError('Firebase did not return an ID token.');
       }
 
-      _channel = WebSocketChannel.connect(Uri.parse('$wsUrl/$_userId'));
+      final channel = WebSocketChannel.connect(Uri.parse('$wsUrl/$_userId'));
+      _channel = channel;
 
       sendAuthentication();
 
       // Update our state with the new channel.
-      state = AsyncData(_channel);
+      state = AsyncData(channel);
 
       // Listen for incoming messages and handle reconnections.
-      _channel!.stream.listen(
+      channel.stream.listen(
         _handleIncomingMessage,
         onError: (error) {
           debugPrint('WebSocket error: $error');
-          _channel = null;
-          _scheduleReconnect();
+          _onChannelClosed(channel);
         },
         onDone: () {
           debugPrint('WebSocket closed');
-          _channel = null;
-          _scheduleReconnect();
+          _onChannelClosed(channel);
         },
       );
+
+      // Connection failures also reach the stream above, so only the success
+      // path matters here.
+      unawaited(
+        channel.ready.then<void>((_) {
+          if (identical(channel, _channel)) _reconnectAttempts = 0;
+        }, onError: (Object _) {}),
+      );
     } catch (e, stackTrace) {
+      if (session != _session) return;
       debugPrint('Connection exception: $e');
       state = AsyncError(e, stackTrace);
       _scheduleReconnect();
     }
   }
 
-  /// Schedules a reconnection after a set delay.
+  void _onChannelClosed(WebSocketChannel channel) {
+    // Late events from a channel we already replaced must not tear down the
+    // current one.
+    if (!identical(channel, _channel)) return;
+    _scheduleReconnect();
+  }
+
+  /// Schedules a reconnection with exponential backoff.
   void _scheduleReconnect() {
-    if (_disposed) return;
+    if (_user == null) return;
 
     _channel?.sink.close();
+    _channel = null;
     state = const AsyncData(null);
     if (_reconnectTimer?.isActive ?? false) return;
-    _reconnectTimer = Timer(_reconnectDelay, () => _connect());
+    _reconnectTimer = Timer(_nextReconnectDelay(), () => _connect());
+  }
+
+  /// Doubles the delay on each failed attempt up to [_maxReconnectDelay], with
+  /// ±20% jitter so clients don't retry in lockstep after a server restart.
+  Duration _nextReconnectDelay() {
+    final exponential =
+        _initialReconnectDelay * pow(2, min(_reconnectAttempts, 6));
+    _reconnectAttempts++;
+    final capped = exponential > _maxReconnectDelay
+        ? _maxReconnectDelay
+        : exponential;
+    return capped * (0.8 + _random.nextDouble() * 0.4);
+  }
+
+  /// Skips the pending backoff, if any, and reconnects immediately.
+  void _reconnectNow() {
+    if (!(_reconnectTimer?.isActive ?? false)) return;
+    _reconnectTimer!.cancel();
+    _reconnectAttempts = 0;
+    _connect();
   }
 
   /// Process incoming messages from the WebSocket.
@@ -140,6 +191,17 @@ class WebSocket extends _$WebSocket {
           return;
         }
 
+        // Chats that were never opened have no details loaded. Reading their
+        // notifier would fetch the whole chat for a single message, so only
+        // bump the list entry; the details load when the chat is opened.
+        final chatProvider = singleChatProvider(message.chatId);
+        if (!ref.exists(chatProvider)) {
+          ref
+              .read(globalChatProvider.notifier)
+              .updateChat(message.chatId, message.text);
+          return;
+        }
+
         final newMessage = Message(
           id: message.id,
           chatId: message.chatId,
@@ -148,9 +210,7 @@ class WebSocket extends _$WebSocket {
           sentAt: message.sentAt,
         );
 
-        ref
-            .read(singleChatProvider(message.chatId).notifier)
-            .addMessage(newMessage);
+        ref.read(chatProvider.notifier).addMessage(newMessage);
       }
     } catch (e) {
       debugPrint('Error handling incoming message: $e');

@@ -25,35 +25,32 @@ class AccountPage extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(10),
                       topRight: Radius.circular(10),
                     ),
                   ),
-                  title: Text('Delete records'),
-                  onTap: () {
-                    showConfirmDialog(
+                  title: const Text('Delete records'),
+                  onTap: () async {
+                    final confirmed = await showConfirmDialog(
                       context,
                       'Delete records',
                       'This will erase all your data and conversations for good. There’s no way to get them back.\n\nDo you really want to go ahead?',
-                      () {
-                        ref.read(authProvider.notifier).delete();
-                      },
                     );
+                    if (!confirmed || !context.mounted) return;
+                    await ref.read(authProvider.notifier).delete();
                   },
                 ),
                 ListTile(
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10),
                     ),
                   ),
-                  title: Text('Logout'),
-                  onTap: () {
-                    ref.read(authProvider.notifier).logout();
-                  },
+                  title: const Text('Logout'),
+                  onTap: () => ref.read(authProvider.notifier).logout(),
                 ),
               ],
             ),

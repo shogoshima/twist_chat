@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Necessary for code-generation to work
 part 'api_client.g.dart';
@@ -26,8 +28,13 @@ class ApiRoutes {
 
 @Riverpod(keepAlive: true)
 class ApiClient extends _$ApiClient {
+  // A single client keeps the connection to the server alive between requests;
+  // the top-level http functions open (and handshake) a new one every call.
+  final http.Client _client = http.Client();
+
   @override
   ApiClient build() {
+    ref.onDispose(_client.close);
     return this;
   }
 
@@ -35,7 +42,7 @@ class ApiClient extends _$ApiClient {
     final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: query);
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
-    final response = await http.get(
+    final response = await _client.get(
       uri,
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -50,7 +57,7 @@ class ApiClient extends _$ApiClient {
     final uri = Uri.parse('$baseUrl$endpoint');
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
-    final response = await http.post(
+    final response = await _client.post(
       uri,
       headers: {
         'Content-Type': 'application/json',
@@ -65,7 +72,7 @@ class ApiClient extends _$ApiClient {
     final uri = Uri.parse('$baseUrl$endpoint');
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
-    final response = await http.put(
+    final response = await _client.put(
       uri,
       headers: {
         'Content-Type': 'application/json',
@@ -81,7 +88,7 @@ class ApiClient extends _$ApiClient {
     final uri = Uri.parse('$baseUrl$endpoint');
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
-    final response = await http.delete(
+    final response = await _client.delete(
       uri,
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +100,9 @@ class ApiClient extends _$ApiClient {
   }
 
   dynamic _handleResponse(http.Response response) {
-    log("Response: ${response.body}, Status Code: ${response.statusCode}");
+    if (kDebugMode) {
+      log('Response: ${response.body}, Status Code: ${response.statusCode}');
+    }
     final json = jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode >= 200 && response.statusCode < 300) {

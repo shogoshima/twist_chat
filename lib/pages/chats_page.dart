@@ -1,170 +1,116 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twist_chat/models/models.dart';
 import 'package:twist_chat/pages/chat_page.dart';
 import 'package:twist_chat/providers/global_chat.dart';
-import 'package:twist_chat/providers/notification.dart';
 import 'package:twist_chat/providers/open_chat.dart';
 import 'package:twist_chat/providers/single_chat.dart';
+import 'package:twist_chat/providers/unread_chats.dart';
 import 'package:twist_chat/widgets/show_create_chat_modal.dart';
-import 'package:twist_chat/widgets/widgets.dart';
-import 'package:flutter_chat_core/flutter_chat_core.dart';
 
-class ChatsPage extends ConsumerStatefulWidget {
+class ChatsPage extends ConsumerWidget {
   const ChatsPage({super.key});
 
   @override
-  ConsumerState<ChatsPage> createState() => _ChatsPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chatSummaries = ref.watch(globalChatProvider);
+    final unreadChats =
+        ref.watch(unreadChatsProvider).value ?? const <String>{};
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: () {
+          // An explicit refresh also drops cached chat details, picking up
+          // anything missed while the socket was disconnected.
+          ref.invalidate(singleChatProvider);
+          return ref.refresh(globalChatProvider.future);
+        },
+        child: switch (chatSummaries) {
+          AsyncData(:final value) when value.isNotEmpty => ListView.builder(
+            itemCount: value.length,
+            itemBuilder: (context, index) {
+              final chatSummary = value[index];
+              return _ChatTile(
+                chatSummary: chatSummary,
+                unread: unreadChats.contains(chatSummary.chatId),
+              );
+            },
+          ),
+          AsyncData() => const _PullableMessage(
+            child: Text('No chats available'),
+          ),
+          AsyncError() => const _PullableMessage(
+            child: Text('Oops! Something went wrong'),
+          ),
+          _ => const _PullableMessage(child: CircularProgressIndicator()),
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => showCreateChatModal(context),
+        icon: const Icon(Icons.add),
+        label: const Text('New chat'),
+      ),
+    );
+  }
 }
 
-class _ChatsPageState extends ConsumerState<ChatsPage> {
-  final TextEditingController _usernameController = TextEditingController();
-  bool _isLoading = false;
+/// Centers [child] in a scrollable, so pull-to-refresh also works when there
+/// is no list to pull.
+class _PullableMessage extends StatelessWidget {
+  const _PullableMessage({required this.child});
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    super.dispose();
-  }
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<List<ChatSummary>> chatSummaries = ref.watch(
-      globalChatProvider,
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [SliverFillRemaining(child: Center(child: child))],
     );
-    final notificationSet = ref.watch(notificationProvider);
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () => ref.refresh(globalChatProvider.future),
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: switch (chatSummaries) {
-                  AsyncData(:final value) =>
-                    value.isEmpty
-                        ? Text('No chats available')
-                        : ListView.builder(
-                          itemCount: value.length,
-                          itemBuilder: (context, index) {
-                            final chatSummary = value[index];
-                            return ListTile(
-                              leading:
-                                  chatSummary.chatPhoto != null
-                                      ? CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                          chatSummary.chatPhoto!,
-                                        ),
-                                      )
-                                      : CircleAvatar(
-                                        backgroundColor: Colors.black,
-                                      ),
-                              title: Text(chatSummary.chatName),
-                              subtitle:
-                                  chatSummary.lastMessage != null
-                                      ? Text(
-                                        chatSummary.lastMessage!,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      )
-                                      : const Text('No messages'),
-                              onTap:
-                                  _isLoading
-                                      ? null
-                                      : () async {
-                                        setState(() {
-                                          _isLoading = true;
-                                        });
+  }
+}
 
-                                        ref
-                                            .read(openChatProvider.notifier)
-                                            .open(chatSummary.chatId);
+class _ChatTile extends ConsumerWidget {
+  const _ChatTile({required this.chatSummary, required this.unread});
 
-                                        await ref
-                                            .read(notificationProvider.notifier)
-                                            .openChat(chatSummary.chatId);
+  final ChatSummary chatSummary;
+  final bool unread;
 
-                                        final chatDetails = await ref.read(
-                                          singleChatProvider(
-                                            chatSummary.chatId,
-                                          ).future,
-                                        );
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: colorScheme.surfaceContainerHighest,
+        backgroundImage: chatSummary.chatPhoto != null
+            ? CachedNetworkImageProvider(chatSummary.chatPhoto!)
+            : null,
+      ),
+      title: Text(chatSummary.chatName),
+      subtitle: Text(
+        chatSummary.lastMessage ?? 'No messages',
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: unread
+          ? Icon(Icons.circle, color: colorScheme.primary, size: 12)
+          : null,
+      onTap: () {
+        ref.read(openChatProvider.notifier).open(chatSummary.chatId);
+        ref.read(unreadChatsProvider.notifier).openChat(chatSummary.chatId);
 
-                                        final messages =
-                                            chatDetails.messages.reversed;
-                                        final participants =
-                                            chatDetails.participants;
-                                        final Map<String, Profile> profiles =
-                                            {};
-                                        for (final participant
-                                            in participants) {
-                                          profiles[participant.id] =
-                                              participant;
-                                        }
-
-                                        final initialMessages =
-                                            messages
-                                                .map(
-                                                  (message) => TextMessage(
-                                                    authorId: message.senderId,
-                                                    id: message.id,
-                                                    text: message.text,
-                                                    createdAt: message.sentAt,
-                                                  ),
-                                                )
-                                                .toList();
-
-                                        setState(() {
-                                          _isLoading = false;
-                                        });
-
-                                        if (!context.mounted) return;
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) => ChatPage(
-                                                  chatId: chatSummary.chatId,
-                                                  initialMessages:
-                                                      initialMessages,
-                                                  profiles: profiles,
-                                                  isGroup: chatSummary.isGroup,
-                                                ),
-                                          ),
-                                        );
-                                      },
-                              trailing: notificationSet.when(
-                                data: (set) {
-                                  if (set.contains(chatSummary.chatId)) {
-                                    return Icon(
-                                      Icons.circle,
-                                      color: Colors.deepPurple,
-                                      size: 12,
-                                    );
-                                  }
-                                  return SizedBox();
-                                },
-                                loading: () => SizedBox(),
-                                error: (error, stackTrace) => SizedBox(),
-                              ),
-                            );
-                          },
-                        ),
-                  AsyncError() => Text('Oops! Something went wrong'),
-                  (_) => CircularProgressIndicator(),
-                },
-              ),
+        // Open right away; the chat page shows its own loading state if the
+        // details aren't cached.
+        Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+            builder: (context) => ChatPage(
+              chatId: chatSummary.chatId,
+              isGroup: chatSummary.isGroup,
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showCreateChatModal(context, ref);
-        },
-        icon: Icon(Icons.add),
-        label: Text('New chat'),
-      ),
+          ),
+        );
+      },
     );
   }
 }
