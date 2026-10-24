@@ -7,6 +7,17 @@ import 'package:twist_chat/providers/api_client.dart';
 
 part 'auth.g.dart';
 
+Future<void>? _googleSignInInitialization;
+
+Future<void> initializeGoogleSignIn() {
+  return _googleSignInInitialization ??= GoogleSignIn.instance
+      .initialize()
+      .catchError((Object error) {
+        _googleSignInInitialization = null;
+        Error.throwWithStackTrace(error, StackTrace.current);
+      });
+}
+
 /// Emits the signed-in [User] (or null) whenever the Firebase session changes.
 /// Session-scoped providers (web socket, chat list) watch this to rebuild on
 /// login/logout instead of relying on a widget to dispose them.
@@ -25,6 +36,8 @@ class Auth extends _$Auth {
 
   Future<void> login() async {
     final apiClient = ref.read(apiClientProvider);
+
+    await initializeGoogleSignIn();
 
     if (!_googleSignIn.supportsAuthenticate()) {
       throw UnsupportedError(

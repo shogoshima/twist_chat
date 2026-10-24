@@ -20,7 +20,7 @@ class UnreadChats extends _$UnreadChats {
     return ids.toSet();
   }
 
-  /// Marca o chat como lido: remove do Set e persiste
+  /// Marks the chat as read by removing it from the set and persisting it.
   Future<void> openChat(String chatId) async {
     // get the current set (or empty)
     final current = state.value ?? <String>{};

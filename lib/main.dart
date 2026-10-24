@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:twist_chat/common/notification_plugin.dart';
 import 'package:twist_chat/common/theme.dart';
 import 'package:twist_chat/pages/pages.dart';
@@ -38,17 +39,8 @@ Future<void> _setupFlutterNotifications() async {
   );
 }
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Independent plugin setups: run them concurrently to shorten startup.
-  await Future.wait([
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-    GoogleSignIn.instance.initialize(),
-    _setupFlutterNotifications(),
-  ]);
-  FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
-
   runApp(
     ProviderScope(
       observers: [if (kDebugMode) MyObserver()],
@@ -66,7 +58,73 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Twist Chat',
       theme: theme,
-      home: const AuthWrapper(),
+      home: const TwistChatBootstrap(),
+    );
+  }
+}
+
+class TwistChatBootstrap extends StatefulWidget {
+  const TwistChatBootstrap({super.key});
+
+  @override
+  State<TwistChatBootstrap> createState() => _TwistChatBootstrapState();
+}
+
+class _TwistChatBootstrapState extends State<TwistChatBootstrap> {
+  late Future<void> _firebaseInitialization;
+
+  @override
+  void initState() {
+    super.initState();
+    _firebaseInitialization = _initializeFirebase();
+  }
+
+  Future<void> _initializeFirebase() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
+
+    // These plugins are useful after launch but must not hold the app at its
+    // native splash screen if setup fails on a particular device.
+    unawaited(_initializeOptionalPlugins());
+  }
+
+  Future<void> _initializeOptionalPlugins() async {
+    try {
+      await initializeGoogleSignIn();
+    } catch (error, stackTrace) {
+      debugPrint('Google Sign-In initialization failed: $error\n$stackTrace');
+    }
+
+    try {
+      await _setupFlutterNotifications();
+    } catch (error, stackTrace) {
+      debugPrint('Notification initialization failed: $error\n$stackTrace');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _firebaseInitialization,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return StartupErrorPage(
+            onRetry: () {
+              setState(() {
+                _firebaseInitialization = _initializeFirebase();
+              });
+            },
+          );
+        }
+
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const LoadingPage();
+        }
+
+        return const AuthWrapper();
+      },
     );
   }
 }
@@ -77,12 +135,12 @@ class AuthWrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (ref.watch(authStateProvider)) {
-      // Se houver um usuário logado, vai para HomePage
+      // If a user is signed in, navigate to HomePage.
       AsyncData(value: _?) => const HomePage(),
-      // Caso contrário, vai para LoginPage
+      // Otherwise, navigate to LoginPage.
       AsyncData() || AsyncError() => const LoginPage(),
-      // Enquanto aguarda a primeira emissão, exibe um loading
-      _ => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      // Show a loading indicator while waiting for the first event.
+      _ => const LoadingPage(),
     };
   }
 }
